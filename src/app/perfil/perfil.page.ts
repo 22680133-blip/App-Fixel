@@ -51,6 +51,11 @@ export class PerfilPage implements OnInit {
         this.totalDispositivos = this.dispositivos.length;
         this.activos = this.dispositivos.filter((d) => d.status === 'activo').length;
       },
+      error: () => {
+        this.dispositivos = [];
+        this.totalDispositivos = 0;
+        this.activos = 0;
+      },
     });
   }
 
@@ -114,9 +119,17 @@ export class PerfilPage implements OnInit {
           // Recargar lista
           this.cargarDispositivos();
         },
-        error: () => {
+        error: (err) => {
           this.creandoDispositivo = false;
-          this.errorCrear = 'Error al crear el dispositivo. Intenta de nuevo.';
+          if (err.status === 0) {
+            this.errorCrear = 'No se puede conectar al servidor. Verifica tu conexión.';
+          } else if (err.status === 404) {
+            this.errorCrear = 'Esta función no está disponible en el servidor actualmente.';
+          } else if (err.status === 401) {
+            this.errorCrear = 'Sesión expirada. Cierra sesión e inicia de nuevo.';
+          } else {
+            this.errorCrear = err.error?.mensaje || 'Error al crear el dispositivo. Intenta de nuevo.';
+          }
         },
       });
   }
