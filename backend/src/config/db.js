@@ -2,10 +2,16 @@ const { Sequelize } = require('sequelize');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Railway internal connections (postgres.railway.internal) don't use SSL.
+// External/proxy connections (*.proxy.rlwy.net) require SSL.
+const databaseUrl = process.env.DATABASE_URL || '';
+const isInternalRailway = databaseUrl.includes('.railway.internal');
+const needsSSL = isProduction && !isInternalRailway;
+
+const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
   logging: isProduction ? false : console.log,
-  dialectOptions: isProduction
+  dialectOptions: needsSSL
     ? { ssl: { require: true, rejectUnauthorized: false } }
     : {},
 });

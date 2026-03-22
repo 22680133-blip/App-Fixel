@@ -13,15 +13,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS: en producción, permite orígenes configurados + orígenes de Capacitor/Ionic
-const allowedOrigins = process.env.NODE_ENV === 'production'
+// Si ALLOWED_ORIGINS no está definido, refleja el origen de la solicitud (permite cualquiera)
+const configuredOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
+const allowedOrigins = process.env.NODE_ENV === 'production' && configuredOrigins.length > 0
   ? [
-      ...(process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
+      ...configuredOrigins,
       'capacitor://localhost',
       'ionic://localhost',
       'http://localhost',
       'http://localhost:8100',
     ]
-  : null; // null = allow all origins in development
+  : null; // null = allow all origins (development or when ALLOWED_ORIGINS is not configured)
 
 const corsOptions = {
   origin: allowedOrigins === null
@@ -66,8 +68,21 @@ app.use('/api/devices', apiLimiter, deviceRoutes);
 app.use('/api/readings', apiLimiter, readingRoutes);
 
 // Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', app: 'App-Fixel Backend', version: '1.0.0' });
+app.get('/', async (req, res) => {
+  let dbStatus = 'unknown';
+  try {
+    const { sequelize } = require('./src/config/db');
+    await sequelize.authenticate();
+    dbStatus = 'connected';
+  } catch {
+    dbStatus = 'disconnected';
+  }
+  res.json({
+    status: dbStatus === 'connected' ? 'ok' : 'degraded',
+    app: 'App-Fixel Backend',
+    version: '1.0.0',
+    database: dbStatus,
+  });
 });
 
 // Iniciar servidor
