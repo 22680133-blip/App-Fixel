@@ -53,7 +53,7 @@ exports.updateProfile = async (req, res) => {
         nombre !== undefined ? String(nombre).trim() : user.nombre,
         telefono !== undefined ? String(telefono).trim() : user.telefono,
         ubicacion !== undefined ? String(ubicacion).trim() : user.ubicacion,
-        picture !== undefined ? picture : user.picture,
+        picture !== undefined ? (picture || null) : user.picture,
         userId,
       ]
     );

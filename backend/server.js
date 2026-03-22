@@ -60,7 +60,7 @@ const apiLimiter = rateLimit({
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Rutas
 app.use('/api/auth', authLimiter, authRoutes);
