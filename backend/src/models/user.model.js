@@ -20,13 +20,16 @@ const User = sequelize.define(
         this.setDataValue('email', value.toLowerCase().trim());
       },
     },
-    password: { type: DataTypes.STRING, defaultValue: null },
+    // Maps to "password_hash" column in the Railway PostgreSQL database
+    password: { type: DataTypes.STRING, field: 'password_hash', defaultValue: null },
     googleId: { type: DataTypes.STRING, defaultValue: null },
     facebookId: { type: DataTypes.STRING, defaultValue: null },
     picture: { type: DataTypes.TEXT, defaultValue: null },
   },
   {
+    tableName: 'users',
     timestamps: true,
+    underscored: true,
     hooks: {
       // Hash de contraseña antes de guardar
       beforeCreate: async (user) => {

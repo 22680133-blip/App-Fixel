@@ -30,7 +30,8 @@ const connectDB = async () => {
       require('../models/device.model');
       require('../models/reading.model');
 
-      await sequelize.sync();
+      // Sync tables — alter adds missing columns to existing tables (e.g. picture)
+      await sequelize.sync({ alter: true });
       console.log('✅ Modelos sincronizados');
       return;
     } catch (err) {

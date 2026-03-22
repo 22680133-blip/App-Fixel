@@ -23,7 +23,7 @@ const Reading = sequelize.define(
     deviceId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'Devices', key: 'id' },
+      references: { model: 'devices', key: 'id' },
     },
 
     // ============================================================
@@ -49,10 +49,12 @@ const Reading = sequelize.define(
     timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
   {
+    tableName: 'readings',
     timestamps: false,
+    underscored: true,
     indexes: [
       // Índice para consultas rápidas por dispositivo y tiempo
-      { fields: ['deviceId', 'timestamp'] },
+      { fields: ['device_id', 'timestamp'] },
     ],
   }
 );
