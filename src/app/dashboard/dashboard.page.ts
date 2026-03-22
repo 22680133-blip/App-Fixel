@@ -89,8 +89,8 @@ export class DashboardPage implements OnInit {
         // Update device status based on reading data
         if (lectura.energia === 'Falla') {
           this.deviceStatus = 'alerta';
-        } else if (this.deviceStatus === 'desconectado') {
-          // If we got a reading, the device is active
+        } else {
+          // Non-failure reading means the device is active
           this.deviceStatus = 'activo';
         }
 
