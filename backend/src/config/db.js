@@ -30,8 +30,12 @@ const connectDB = async () => {
       require('../models/device.model');
       require('../models/reading.model');
 
-      // Sync tables — alter adds missing columns to existing tables (e.g. picture)
-      await sequelize.sync({ alter: true });
+      // In development, alter adds missing columns to existing tables (e.g. picture).
+      // In production, use DB_SYNC_ALTER=true env var to enable; plain sync() is safer.
+      const shouldAlter = isProduction
+        ? process.env.DB_SYNC_ALTER === 'true'
+        : true;
+      await sequelize.sync(shouldAlter ? { alter: true } : undefined);
       console.log('✅ Modelos sincronizados');
       return;
     } catch (err) {
