@@ -43,7 +43,7 @@
 
 <input
 type="range"
-min="-5"
+min="-10"
 max="10"
 [(ngModel)]="minTemp">
 
@@ -60,6 +60,7 @@ min="0"
 max="15"
 [(ngModel)]="maxTemp">
 
+<p class="validation-error" *ngIf="validationError">⚠️ {{validationError}}</p>
 
 <div class="info-box">
 💡 Rango recomendado: 2°C - 8°C para conservar alimentos de forma segura.
@@ -105,7 +106,7 @@ max="15"
 <div class="unit-buttons">
 
 <button
-(click)="unit='C'"
+(click)="setUnit('C')"
 [class.active]="unit==='C'">
 
 Celsius (°C)
@@ -114,7 +115,7 @@ Celsius (°C)
 
 
 <button
-(click)="unit='F'"
+(click)="setUnit('F')"
 [class.active]="unit==='F'">
 
 Fahrenheit (°F)
@@ -127,7 +128,7 @@ Fahrenheit (°F)
 
 
 
-<!-- BOTON -->
+<!-- BOTON GUARDAR -->
 
 <button class="save-btn" (click)="guardar()" [disabled]="isLoading">
   {{ isLoading ? 'Guardando...' : 'Guardar Configuración' }}
@@ -135,6 +136,60 @@ Fahrenheit (°F)
 
 <p class="success-msg" *ngIf="guardado">✅ Configuración guardada correctamente.</p>
 <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+
+<!-- CAMBIO DE CONTRASEÑA -->
+
+<div class="password-card">
+
+<h3>🔑 Cambiar Contraseña</h3>
+
+<label>Contraseña actual</label>
+<div class="password-input-group">
+  <input
+    [type]="showCurrentPassword ? 'text' : 'password'"
+    [(ngModel)]="currentPassword"
+    placeholder="Ingresa tu contraseña actual"
+    class="password-input">
+  <button type="button" class="toggle-pw" (click)="showCurrentPassword = !showCurrentPassword" aria-label="Mostrar contraseña actual">
+    {{showCurrentPassword ? '🙈' : '👁️'}}
+  </button>
+</div>
+
+<label>Nueva contraseña</label>
+<div class="password-input-group">
+  <input
+    [type]="showNewPassword ? 'text' : 'password'"
+    [(ngModel)]="newPassword"
+    placeholder="Mínimo 6 caracteres"
+    class="password-input">
+  <button type="button" class="toggle-pw" (click)="showNewPassword = !showNewPassword" aria-label="Mostrar nueva contraseña">
+    {{showNewPassword ? '🙈' : '👁️'}}
+  </button>
+</div>
+
+<label>Confirmar nueva contraseña</label>
+<input
+  type="password"
+  [(ngModel)]="confirmPassword"
+  placeholder="Repite la nueva contraseña"
+  class="password-input">
+
+<p class="password-error" *ngIf="passwordError">{{passwordError}}</p>
+<p class="password-success" *ngIf="passwordMsg">✅ {{passwordMsg}}</p>
+
+<button class="password-btn" (click)="cambiarPassword()" [disabled]="changingPassword">
+  {{ changingPassword ? 'Cambiando...' : 'Cambiar Contraseña' }}
+</button>
+
+</div>
+
+
+<!-- CERRAR SESIÓN -->
+
+<button class="logout-btn" (click)="logout()">
+  🚪 Cerrar Sesión
+</button>
 
 <p class="note">
   Los cambios se aplicarán inmediatamente al monitoreo de temperatura.

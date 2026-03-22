@@ -26,8 +26,8 @@
 
 <p class="status">Usuario activo</p>
 
-
-<div class="user-info">
+<!-- VIEW MODE -->
+<div class="user-info" *ngIf="!editMode">
 
 <div class="info-row">
 
@@ -41,7 +41,7 @@
 
 <img src="assets/img/llamada.png">
 
-<span>+52 777 000 0000</span>
+<span>{{usuario?.telefono || 'Sin teléfono'}}</span>
 
 </div>
 
@@ -49,11 +49,38 @@
 
 <img src="assets/img/ubicacion.png">
 
-<span>Morelos, México</span>
+<span>{{usuario?.ubicacion || 'Sin ubicación'}}</span>
 
 </div>
 
+<button class="edit-profile-btn" (click)="toggleEditMode()">✏️ Editar perfil</button>
+
 </div>
+
+<!-- EDIT MODE -->
+<div class="user-info" *ngIf="editMode">
+
+<label class="edit-label">Nombre</label>
+<input type="text" [(ngModel)]="editNombre" class="edit-input" placeholder="Tu nombre">
+
+<label class="edit-label">Teléfono</label>
+<input type="tel" [(ngModel)]="editTelefono" class="edit-input" placeholder="+52 777 000 0000">
+
+<label class="edit-label">Ubicación</label>
+<input type="text" [(ngModel)]="editUbicacion" class="edit-input" placeholder="Ciudad, País">
+
+<p class="profile-error" *ngIf="profileError">{{profileError}}</p>
+
+<div class="edit-buttons">
+  <button class="edit-cancel-btn" (click)="toggleEditMode()">Cancelar</button>
+  <button class="edit-save-btn" (click)="guardarPerfil()" [disabled]="savingProfile">
+    {{savingProfile ? 'Guardando...' : 'Guardar'}}
+  </button>
+</div>
+
+</div>
+
+<p class="profile-success" *ngIf="profileMsg">✅ {{profileMsg}}</p>
 
 </div>
 

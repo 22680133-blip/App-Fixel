@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
-import { AuthService } from '../services/auth.service';
+import { AuthService, Usuario } from '../services/auth.service';
 import { DeviceService, Dispositivo } from '../services/device.service';
 
 @Component({
@@ -22,10 +22,19 @@ export class PerfilPage implements OnInit {
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
 
-  usuario = this.auth.getUsuario();
+  usuario: Usuario | null = this.auth.getUsuario();
   dispositivos: Dispositivo[] = [];
   totalDispositivos = 0;
   activos = 0;
+
+  // Editable profile fields
+  editMode = false;
+  editNombre = '';
+  editTelefono = '';
+  editUbicacion = '';
+  savingProfile = false;
+  profileMsg = '';
+  profileError = '';
 
   // Modal "Agregar dispositivo"
   mostrarModal = false;
@@ -40,8 +49,27 @@ export class PerfilPage implements OnInit {
 
   ngOnInit() {
     if (this.usuario) {
+      this.editNombre = this.usuario.nombre || '';
+      this.editTelefono = this.usuario.telefono || '';
+      this.editUbicacion = this.usuario.ubicacion || '';
       this.cargarDispositivos();
+      this.cargarPerfilFresco();
     }
+  }
+
+  /** Carga datos frescos del usuario desde el backend (para obtener telefono/ubicacion reales) */
+  private cargarPerfilFresco() {
+    this.auth.getMe().subscribe({
+      next: (res) => {
+        this.usuario = res.usuario;
+        this.editNombre = this.usuario.nombre || '';
+        this.editTelefono = this.usuario.telefono || '';
+        this.editUbicacion = this.usuario.ubicacion || '';
+      },
+      error: () => {
+        // Si falla, mantener los datos locales
+      },
+    });
   }
 
   cargarDispositivos() {
@@ -55,6 +83,49 @@ export class PerfilPage implements OnInit {
         this.dispositivos = [];
         this.totalDispositivos = 0;
         this.activos = 0;
+      },
+    });
+  }
+
+  // ============================================================
+  // Editar perfil
+  // ============================================================
+  toggleEditMode() {
+    this.editMode = !this.editMode;
+    this.profileMsg = '';
+    this.profileError = '';
+    if (this.editMode && this.usuario) {
+      this.editNombre = this.usuario.nombre || '';
+      this.editTelefono = this.usuario.telefono || '';
+      this.editUbicacion = this.usuario.ubicacion || '';
+    }
+  }
+
+  guardarPerfil() {
+    if (!this.editNombre.trim()) {
+      this.profileError = 'El nombre es obligatorio.';
+      return;
+    }
+
+    this.savingProfile = true;
+    this.profileError = '';
+    this.profileMsg = '';
+
+    this.auth.updateProfile({
+      nombre: this.editNombre.trim(),
+      telefono: this.editTelefono.trim(),
+      ubicacion: this.editUbicacion.trim(),
+    }).subscribe({
+      next: (res) => {
+        this.savingProfile = false;
+        this.usuario = res.usuario;
+        this.editMode = false;
+        this.profileMsg = 'Perfil actualizado correctamente.';
+        setTimeout(() => (this.profileMsg = ''), 3000);
+      },
+      error: (err) => {
+        this.savingProfile = false;
+        this.profileError = err.error?.mensaje || 'Error al actualizar perfil.';
       },
     });
   }

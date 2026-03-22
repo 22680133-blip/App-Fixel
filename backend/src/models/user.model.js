@@ -25,6 +25,8 @@ const User = sequelize.define(
     googleId: { type: DataTypes.STRING, defaultValue: null },
     facebookId: { type: DataTypes.STRING, defaultValue: null },
     picture: { type: DataTypes.TEXT, defaultValue: null },
+    telefono: { type: DataTypes.STRING, defaultValue: null },
+    ubicacion: { type: DataTypes.STRING, defaultValue: null },
   },
   {
     tableName: 'users',
