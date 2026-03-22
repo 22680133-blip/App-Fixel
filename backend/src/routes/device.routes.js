@@ -15,7 +15,7 @@ async function generateDeviceId() {
   let deviceId;
   let exists = true;
   while (exists) {
-    const suffix = crypto.randomBytes(3).toString('hex').toUpperCase().slice(0, 4);
+    const suffix = crypto.randomBytes(2).toString('hex').toUpperCase();
     deviceId = `FRIDGE-${suffix}`;
     const count = await Device.count({ where: { deviceId } });
     exists = count > 0;

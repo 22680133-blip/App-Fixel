@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { IonContent } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
 
@@ -13,7 +12,7 @@ import { DeviceService, Dispositivo, Lectura } from '../services/device.service'
   standalone: true,
   imports: [IonContent, CommonModule],
 })
-export class DashboardPage implements OnInit, OnDestroy {
+export class DashboardPage implements OnInit {
   // Datos del usuario
   nombreUsuario = 'Usuario';
 
@@ -39,7 +38,6 @@ export class DashboardPage implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
-  private activeSub: Subscription | null = null;
 
   ngOnInit() {
     const usuario = this.auth.getUsuario();
@@ -47,10 +45,6 @@ export class DashboardPage implements OnInit, OnDestroy {
       this.nombreUsuario = usuario.nombre || usuario.email;
     }
     this.cargarDatos();
-  }
-
-  ngOnDestroy() {
-    this.activeSub?.unsubscribe();
   }
 
   private cargarDatos() {
