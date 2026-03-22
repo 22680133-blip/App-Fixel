@@ -11,6 +11,14 @@ const Device = sequelize.define(
       references: { model: 'users', key: 'id' },
     },
 
+    // Identificador único legible del dispositivo (ej: "FRIDGE-001", generado por el backend)
+    // Este ID se configura manualmente en el ESP32 para vincular app ↔ backend ↔ sensor
+    deviceId: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
+
     // Nombre descriptivo (el usuario puede editarlo en Configuración)
     nombre: {
       type: DataTypes.STRING,
@@ -18,6 +26,12 @@ const Device = sequelize.define(
       set(value) {
         this.setDataValue('nombre', value ? value.trim() : 'Mi Refrigerador');
       },
+    },
+
+    // Ubicación física del dispositivo (ej: "Cocina", "Almacén")
+    ubicacion: {
+      type: DataTypes.STRING,
+      defaultValue: '',
     },
 
     // Configuración de temperatura (guardada desde pantalla5 y Configuración)

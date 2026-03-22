@@ -40,6 +40,13 @@
   font-size: 12px;
 }
 
+.device-id-text {
+  color: rgba(0, 229, 255, 0.8) !important;
+  font-family: monospace;
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+}
+
 .fridge-icon {
   width: 65px;
   height: 65px;
@@ -243,6 +250,21 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+.alert-temp {
+  background: linear-gradient(135deg, rgba(255, 200, 50, 0.1), rgba(255, 165, 0, 0.05)) !important;
+  border: 2px solid rgba(255, 200, 50, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(255, 200, 50, 0.1) !important;
+}
+
+.alert-temp h4 {
+  color: #ffc832 !important;
+}
+
+.alert-icon-temp {
+  font-size: 32px;
+  flex-shrink: 0;
 }
 
 /* TEMPERATURE */

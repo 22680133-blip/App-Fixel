@@ -33,6 +33,20 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
   }
 
   private cargarConfiguracion() {
+    // Intentar usar el dispositivo activo guardado
+    const active = this.deviceService.getActiveDevice();
+
+    if (active) {
+      this.dispositivoId = active.id;
+      this.deviceName = active.nombre;
+      this.minTemp = active.tempMin;
+      this.maxTemp = active.tempMax;
+      this.unit = active.unidad;
+      this.alerts = active.alertas;
+      return;
+    }
+
+    // Si no hay dispositivo activo, cargar el primero de la lista
     this.deviceService.getDispositivos().subscribe({
       next: (res) => {
         if (res.devices && res.devices.length > 0) {
@@ -43,6 +57,9 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
           this.maxTemp = d.tempMax;
           this.unit = d.unidad;
           this.alerts = d.alertas;
+
+          // Guardar como dispositivo activo
+          this.deviceService.setActiveDevice(d);
         }
       },
     });

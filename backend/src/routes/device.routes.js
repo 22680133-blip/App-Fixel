@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const auth = require('../middleware/auth.middleware');
 const Device = require('../models/device.model');
 
@@ -6,6 +7,21 @@ const router = express.Router();
 
 // Todas las rutas requieren autenticación
 router.use(auth);
+
+// ============================================================
+// Genera un deviceId único con formato "FRIDGE-XXXX"
+// ============================================================
+async function generateDeviceId() {
+  let deviceId;
+  let exists = true;
+  while (exists) {
+    const suffix = crypto.randomBytes(3).toString('hex').toUpperCase().slice(0, 4);
+    deviceId = `FRIDGE-${suffix}`;
+    const count = await Device.count({ where: { deviceId } });
+    exists = count > 0;
+  }
+  return deviceId;
+}
 
 // ============================================================
 // GET /api/devices — Listar dispositivos del usuario
@@ -38,13 +54,17 @@ router.get('/:id', async (req, res) => {
 
 // ============================================================
 // POST /api/devices — Crear un nuevo dispositivo
+// Genera automáticamente un deviceId único (ej: "FRIDGE-A1B2")
 // ============================================================
 router.post('/', async (req, res) => {
   try {
-    const { nombre, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
+    const { nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
+    const deviceId = await generateDeviceId();
     const device = await Device.create({
       userId: req.userId,
+      deviceId,
       nombre: nombre || 'Mi Refrigerador',
+      ubicacion: ubicacion || '',
       tempMin: tempMin ?? 2,
       tempMax: tempMax ?? 8,
       unidad: unidad || 'C',
@@ -63,13 +83,13 @@ router.post('/', async (req, res) => {
 // ============================================================
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
+    const { nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
 
     const device = await Device.findOne({ where: { id: req.params.id, userId: req.userId } });
 
     if (!device) return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
 
-    await device.update({ nombre, tempMin, tempMax, unidad, alertas, alimentos });
+    await device.update({ nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos });
     return res.json({ device });
   } catch (error) {
     console.error('❌ Error update device:', error.message);
