@@ -29,6 +29,7 @@
     "@capacitor/status-bar": "8.0.1",
     "@ionic/angular": "^8.0.0",
     "@react-oauth/google": "^0.13.4",
+    "chart.js": "^4.5.1",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

@@ -461,6 +461,84 @@
   margin-top: 4px;
 }
 
+.compresor-on {
+  color: #00ff6a !important;
+}
+
+/* LOADING & ERROR */
+.loading-card {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(25, 211, 211, 0.04));
+  border: 2px solid rgba(0, 229, 255, 0.2);
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.loading-card p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 14px;
+}
+
+/* UNIT TOGGLE */
+.temp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unit-toggle {
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.unit-toggle:hover {
+  background: rgba(0, 229, 255, 0.25);
+}
+
+.temp-status {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.temp-alert {
+  background: linear-gradient(135deg, #ff6b9d, #ff3d6e) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* STATUS DOT VARIANTS */
+.status-off {
+  background: linear-gradient(135deg, #ff3d6e, #ff6b9d) !important;
+  box-shadow: 0 0 10px rgba(255, 61, 110, 0.6) !important;
+}
+
+/* DISCONNECTED ALERT */
+.alert-disconnected {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(255, 61, 110, 0.04)) !important;
+  border: 2px solid rgba(255, 61, 110, 0.25) !important;
+}
+
+.alert-disconnected h4 {
+  color: #ff6b9d !important;
+}
+
+/* CHART */
+.chart-container {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
 /* ANIMATIONS */
 @keyframes fadeIn {
   from {

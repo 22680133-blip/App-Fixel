@@ -9,6 +9,8 @@ export interface Usuario {
   nombre: string;
   email: string;
   picture?: string;
+  telefono?: string;
+  ubicacion?: string;
 }
 
 export interface AuthResponse {
@@ -91,5 +93,27 @@ export class AuthService {
   private saveSession(res: AuthResponse): void {
     localStorage.setItem('token', res.token);
     localStorage.setItem('usuario', JSON.stringify(res.usuario));
+  }
+
+  /** Actualizar perfil del usuario */
+  updateProfile(data: Partial<Usuario>): Observable<{ usuario: Usuario }> {
+    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    return this.http
+      .put<{ usuario: Usuario }>(`${this.API}/profile`, data, { headers })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem('usuario', JSON.stringify(res.usuario));
+        }),
+      );
+  }
+
+  /** Cambiar contraseña */
+  changePassword(currentPassword: string, newPassword: string): Observable<{ mensaje: string }> {
+    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    return this.http.put<{ mensaje: string }>(
+      `${this.API}/password`,
+      { currentPassword, newPassword },
+      { headers },
+    );
   }
 }

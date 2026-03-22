@@ -388,3 +388,122 @@ input:checked + .slider:before {
     transform: translateY(0);
   }
 }
+
+/* VALIDATION ERROR */
+.validation-error {
+  color: #ff6b9d;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* PASSWORD CHANGE */
+.password-card {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(25, 211, 211, 0.04));
+  border: 2px solid rgba(0, 229, 255, 0.2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.password-card h3 {
+  color: #00e5ff;
+  font-size: 16px;
+  margin: 0 0 16px 0;
+}
+
+.password-card label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.password-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  border-color: #00e5ff;
+}
+
+.password-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-input-group .password-input {
+  flex: 1;
+}
+
+.toggle-pw {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.password-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  background: linear-gradient(135deg, #00e5ff, #19d3d3);
+  border: none;
+  border-radius: 10px;
+  color: #0f1824;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.password-btn:disabled {
+  opacity: 0.5;
+}
+
+.password-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+}
+
+.password-error {
+  color: #ff6b9d;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.password-success {
+  color: #00ff6a;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* LOGOUT */
+.logout-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  background: rgba(255, 61, 110, 0.1);
+  border: 2px solid rgba(255, 61, 110, 0.3);
+  border-radius: 12px;
+  color: #ff6b9d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 61, 110, 0.2);
+}

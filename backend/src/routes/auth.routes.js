@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
+const auth = require('../middleware/auth.middleware');
 const User = require('../models/user.model');
 
 const router = express.Router();
@@ -19,6 +20,8 @@ const formatUser = (user) => ({
   nombre: user.nombre,
   email: user.email,
   picture: user.picture,
+  telefono: user.telefono || '',
+  ubicacion: user.ubicacion || '',
 });
 
 /** Verifica si el error es de conexión a la base de datos */
@@ -163,6 +166,62 @@ router.post('/facebook-login', async (req, res) => {
   } catch (error) {
     console.error('❌ Error facebook-login:', error.message);
     return res.status(401).json({ mensaje: 'Error al validar token de Facebook' });
+  }
+});
+
+// ============================================================
+// PUT /api/auth/profile — Actualizar perfil del usuario
+// ============================================================
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { nombre, telefono, ubicacion, picture } = req.body;
+    const user = await User.findByPk(req.userId);
+    if (!user) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+    if (nombre !== undefined) user.nombre = nombre;
+    if (telefono !== undefined) user.telefono = telefono;
+    if (ubicacion !== undefined) user.ubicacion = ubicacion;
+    if (picture !== undefined) user.picture = picture;
+
+    await user.save();
+    return res.json({ usuario: formatUser(user) });
+  } catch (error) {
+    console.error('❌ Error update profile:', error.message);
+    return res.status(500).json({ mensaje: 'Error al actualizar perfil' });
+  }
+});
+
+// ============================================================
+// PUT /api/auth/password — Cambiar contraseña
+// ============================================================
+router.put('/password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ mensaje: 'Contraseña actual y nueva son requeridas' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ mensaje: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    const user = await User.findByPk(req.userId);
+    if (!user) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+    if (!user.password) {
+      return res.status(400).json({ mensaje: 'Tu cuenta usa autenticación social. No puedes cambiar contraseña.' });
+    }
+
+    const valid = await user.comparePassword(currentPassword);
+    if (!valid) {
+      return res.status(401).json({ mensaje: 'Contraseña actual incorrecta' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+    return res.json({ mensaje: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error('❌ Error change password:', error.message);
+    return res.status(500).json({ mensaje: 'Error al cambiar contraseña' });
   }
 });
 

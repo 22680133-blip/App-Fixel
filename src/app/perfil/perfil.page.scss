@@ -537,3 +537,94 @@
   margin: 12px 0 20px 0;
   line-height: 1.4;
 }
+
+/* EDIT PROFILE */
+.edit-profile-btn {
+  margin-top: 16px;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.edit-profile-btn:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.edit-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.edit-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.edit-input:focus {
+  border-color: #00e5ff;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.edit-cancel-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-save-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #00e5ff, #19d3d3);
+  border: none;
+  color: #0f1824;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-save-btn:disabled {
+  opacity: 0.5;
+}
+
+.profile-error {
+  color: #ff6b9d;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.profile-success {
+  color: #00ff6a;
+  font-size: 13px;
+  margin-top: 10px;
+  text-align: center;
+}

@@ -2,8 +2,27 @@
 
 <div class="container">
 
+  <!-- LOADING STATE -->
+  <div class="loading-card" *ngIf="isLoading">
+    <p>Cargando datos del dispositivo...</p>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="alert-card" *ngIf="errorMsg">
+    <div class="alert-icon-temp">⚠️</div>
+    <div>
+      <h4>Error</h4>
+      <p>{{errorMsg}}</p>
+    </div>
+  </div>
+
+  <!-- NO DEVICES STATE -->
+  <div class="loading-card" *ngIf="sinDatos && !isLoading">
+    <p>No tienes dispositivos registrados. Ve a tu perfil para agregar uno.</p>
+  </div>
+
   <!-- HEADER -->
-  <div class="header">
+  <div class="header" *ngIf="!isLoading && !sinDatos">
 
     <div class="fridge-info">
       <img src="assets/img/device.png" class="fridge-icon">
@@ -22,7 +41,7 @@
 
 
   <!-- USUARIO -->
-  <div class="user">
+  <div class="user" *ngIf="!isLoading && !sinDatos">
     <div class="user-left">
       <img src="assets/img/ola.png">
       <span>Hola, {{nombreUsuario}}</span>
@@ -33,15 +52,25 @@
 
 
   <!-- ESTADO DISPOSITIVO -->
-  <div class="device-card">
+  <div class="device-card" *ngIf="!isLoading && !sinDatos">
 
     <div class="device-left">
       <img src="assets/img/key.png">
       <span>{{deviceStatus === 'activo' ? 'Dispositivo Conectado' : deviceStatus === 'alerta' ? 'Dispositivo en Alerta' : 'Dispositivo Desconectado'}}</span>
     </div>
 
-    <div class="status-dot" [ngClass]="{'status-activo': deviceStatus === 'activo', 'status-alerta': deviceStatus === 'alerta'}"></div>
+    <div class="status-dot" [ngClass]="{'status-activo': deviceStatus === 'activo', 'status-alerta': deviceStatus === 'alerta', 'status-off': deviceStatus === 'desconectado'}"></div>
 
+  </div>
+
+
+  <!-- ALERTA DISPOSITIVO DESCONECTADO -->
+  <div class="alert-card alert-disconnected" *ngIf="deviceStatus === 'desconectado' && !isLoading && !sinDatos">
+    <div class="alert-icon-temp">🔌</div>
+    <div>
+      <h4>Dispositivo Desconectado</h4>
+      <p>No se han recibido datos recientes del sensor. Verifica la conexión del ESP32.</p>
+    </div>
   </div>
 
 
@@ -72,45 +101,56 @@
 
 
   <!-- TEMPERATURA ACTUAL -->
-  <div class="temperature-card">
+  <div class="temperature-card" *ngIf="!isLoading && !sinDatos">
 
-    <h3>🌡️ Temperatura Actual</h3>
-
-    <div class="temp-value">
-      {{temperatura}}°C
+    <div class="temp-header">
+      <h3>🌡️ Temperatura Actual</h3>
+      <button class="unit-toggle" (click)="toggleUnit()">
+        {{unit === 'C' ? '°F' : '°C'}}
+      </button>
     </div>
+
+    <div class="temp-value" [ngClass]="{'temp-alert': fueraDeRango}">
+      {{getDisplayTemp(temperaturaNum)}}{{unitSymbol}}
+    </div>
+
+    <p class="temp-status" *ngIf="temperaturaNum !== null">
+      {{fueraDeRango ? '⚠️ Fuera de rango' : '✅ Normal'}}
+    </p>
 
   </div>
 
 
   <!-- MIN MAX -->
-  <div class="temp-range">
+  <div class="temp-range" *ngIf="!isLoading && !sinDatos">
 
     <div class="min-card">
       <h4>❄️ Mínimo</h4>
-      <p>{{minTemp}}°C</p>
+      <p>{{getDisplayTemp(minTemp)}}{{unitSymbol}}</p>
     </div>
 
     <div class="max-card">
       <h4>🔥 Máximo</h4>
-      <p>{{maxTemp}}°C</p>
+      <p>{{getDisplayTemp(maxTemp)}}{{unitSymbol}}</p>
     </div>
 
   </div>
 
 
-  <!-- HISTORIAL -->
-  <div class="history-card">
+  <!-- HISTORIAL (CHART.JS) -->
+  <div class="history-card" *ngIf="!isLoading && !sinDatos">
 
     <h4>📊 Historial (24h)</h4>
 
-    <img src="assets/img/chart.png">
+    <div class="chart-container">
+      <canvas #chartCanvas></canvas>
+    </div>
 
   </div>
 
 
   <!-- ESTADOS -->
-  <div class="status-grid">
+  <div class="status-grid" *ngIf="!isLoading && !sinDatos">
 
     <div class="status-card">
       <img src="assets/img/energy.png">
@@ -121,7 +161,7 @@
     <div class="status-card">
       <img src="assets/img/compressor.png">
       <p>Compresor</p>
-      <span>{{compresor}}</span>
+      <span [ngClass]="{'compresor-on': compresor === 'Encendido'}">{{compresor}}</span>
     </div>
 
   </div>
