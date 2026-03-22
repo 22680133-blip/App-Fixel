@@ -9,6 +9,7 @@
       <img src="assets/img/device.png" class="fridge-icon">
       <div>
         <h2>{{deviceNombre}}</h2>
+        <p *ngIf="deviceId" class="device-id-text">ID: {{deviceId}}</p>
         <p>Última actualización: {{ultimaActualizacion}}</p>
       </div>
     </div>
@@ -52,6 +53,19 @@
     <div>
       <h4>Posible Falla de Energía</h4>
       <p>Se detectó una interrupción en el suministro eléctrico. El refrigerador podría no estar funcionando.</p>
+    </div>
+
+  </div>
+
+
+  <!-- ALERTA TEMPERATURA FUERA DE RANGO -->
+  <div class="alert-card alert-temp" *ngIf="fueraDeRango">
+
+    <div class="alert-icon-temp">🌡️</div>
+
+    <div>
+      <h4>Temperatura Fuera de Rango</h4>
+      <p>{{alertaTempMsg}}</p>
     </div>
 
   </div>

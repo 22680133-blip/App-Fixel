@@ -84,7 +84,10 @@
 
   <!-- LISTA DE DISPOSITIVOS -->
 
-  <div class="device" *ngFor="let device of dispositivos">
+  <div class="device"
+       *ngFor="let device of dispositivos"
+       [class.device-selected]="esDispositivoActivo(device)"
+       (click)="seleccionarDispositivo(device)">
 
     <div class="device-left">
 
@@ -94,11 +97,15 @@
 
         <h4>{{device.nombre}}</h4>
 
-        <p *ngIf="device.status === 'activo'">
+        <p class="device-id-label">ID: {{device.deviceId}}</p>
+
+        <p *ngIf="device.ubicacion" class="device-ubicacion">📍 {{device.ubicacion}}</p>
+
+        <p *ngIf="device.status === 'activo'" class="device-status-activo">
             Activo
         </p>
 
-        <p *ngIf="device.status !== 'activo'">
+        <p *ngIf="device.status !== 'activo'" class="device-status-off">
           Desconectado
         </p>
 
@@ -106,16 +113,19 @@
 
     </div>
 
-    <button class="config-btn" (click)="configurarDispositivo(device)">
-      Configurar →
-    </button>
+    <div class="device-actions">
+      <span *ngIf="esDispositivoActivo(device)" class="active-badge">✔ Activo</span>
+      <button class="config-btn" (click)="configurarDispositivo(device); $event.stopPropagation()">
+        Configurar →
+      </button>
+    </div>
 
   </div>
 
 
   <!-- BOTON AGREGAR -->
 
-  <button class="add-device" (click)="agregarDispositivo()">
+  <button class="add-device" (click)="abrirModalAgregar()">
     + Agregar dispositivo
   </button>
 
@@ -176,6 +186,59 @@ Frixel v1.0
 
 </p>
 
+</div>
+
+
+<!-- ============================================================ -->
+<!-- MODAL: Agregar Dispositivo                                    -->
+<!-- ============================================================ -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h3>Agregar Dispositivo</h3>
+
+    <label>Nombre del dispositivo</label>
+    <input
+      type="text"
+      [(ngModel)]="nuevoNombre"
+      placeholder="Ej: Refrigerador Cocina"
+      class="modal-input">
+
+    <label>Ubicación</label>
+    <input
+      type="text"
+      [(ngModel)]="nuevoUbicacion"
+      placeholder="Ej: Cocina principal"
+      class="modal-input">
+
+    <p class="modal-error" *ngIf="errorCrear">{{errorCrear}}</p>
+
+    <div class="modal-buttons">
+      <button class="modal-btn-cancel" (click)="cerrarModal()">Cancelar</button>
+      <button class="modal-btn-save" (click)="crearDispositivo()" [disabled]="creandoDispositivo">
+        {{ creandoDispositivo ? 'Creando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- MODAL: Device ID Creado                                       -->
+<!-- ============================================================ -->
+<div class="modal-overlay" *ngIf="mostrarDeviceIdModal" (click)="cerrarDeviceIdModal()">
+  <div class="modal-content modal-success" (click)="$event.stopPropagation()">
+    <div class="success-icon">✅</div>
+    <h3>Dispositivo Creado</h3>
+    <p class="modal-desc">Tu dispositivo fue registrado exitosamente. Usa este ID para configurar tu ESP32:</p>
+
+    <div class="device-id-display">
+      {{deviceIdCreado}}
+    </div>
+
+    <p class="modal-hint">⚠️ Configura este ID en el firmware de tu ESP32 para vincular el sensor con la app.</p>
+
+    <button class="modal-btn-save" (click)="cerrarDeviceIdModal()">Entendido</button>
+  </div>
 </div>
 
 </ion-content>
