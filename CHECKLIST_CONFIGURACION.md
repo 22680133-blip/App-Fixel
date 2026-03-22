@@ -7,7 +7,11 @@
 - [ ] Crear nuevo proyecto
 - [ ] Habilitar Google+ API
 - [ ] Crear credenciales OAuth 2.0 (Aplicación Web)
-- [ ] Agregar `http://localhost:4200` como URI autorizado
+- [ ] Agregar orígenes autorizados de JavaScript:
+  - `http://localhost:8100` (Ionic serve)
+  - `http://localhost:4200` (ng serve)
+  - `http://localhost` (Capacitor)
+  - `https://tudominio.com` (Producción)
 - [ ] Copiar tu **Google Client ID** (termina con `.apps.googleusercontent.com`)
 
 ### Facebook
@@ -126,6 +130,12 @@ app.use(cors({
 ---
 
 ## 🆘 Problemas Comunes
+
+### Error 400: origin_mismatch (Acceso bloqueado)
+- ✓ Abre la consola del navegador (F12) y busca: `[Google Sign-In] Origen actual: "..."`
+- ✓ Copia ese origen y agrégalo en Google Cloud Console → Credenciales → OAuth 2.0 → **Orígenes autorizados de JavaScript**
+- ✓ Recuerda agregar `http://localhost:8100` si usas `ionic serve`
+- ✓ Espera ~5 minutos para que se propague el cambio
 
 ### Google no aparece
 - ✓ Verifica que Google Client ID es correcto

@@ -64,26 +64,34 @@ export class Pantalla2Page implements OnInit {
     const google = (window as any).google;
     if (!google?.accounts?.id) return;
 
-    google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response: any) => this.handleGoogleResponse(response),
-      use_fedcm_for_prompt: true,
-    });
-
-    // Render a real Google Sign-In button (more reliable than One Tap prompt)
-    const container = document.getElementById('google-btn-login');
-    if (container) {
-      google.accounts.id.renderButton(container, {
-        type: 'icon',
-        shape: 'circle',
-        theme: 'filled_black',
-        size: 'large',
+    try {
+      google.accounts.id.initialize({
+        client_id: environment.googleClientId,
+        callback: (response: any) => this.handleGoogleResponse(response),
+        use_fedcm_for_prompt: true,
       });
-    }
 
-    this.zone.run(() => {
-      this.googleReady = true;
-    });
+      // Render a real Google Sign-In button (more reliable than One Tap prompt)
+      const container = document.getElementById('google-btn-login');
+      if (container) {
+        google.accounts.id.renderButton(container, {
+          type: 'icon',
+          shape: 'circle',
+          theme: 'filled_black',
+          size: 'large',
+        });
+      }
+
+      this.zone.run(() => {
+        this.googleReady = true;
+      });
+    } catch (err) {
+      console.error(
+        `[Google Sign-In] Error al inicializar. Origen actual: "${window.location.origin}". ` +
+        'Asegúrate de registrar este origen en Google Cloud Console → Credenciales → OAuth 2.0 → Orígenes autorizados de JavaScript.',
+        err
+      );
+    }
   }
 
   togglePassword() {
