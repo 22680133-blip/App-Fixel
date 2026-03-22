@@ -24,6 +24,8 @@ export class PerfilPage implements OnInit {
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
+  private readonly MAX_PHOTO_SIZE_MB = 5;
+
   usuario: Usuario | null = this.auth.getUsuario();
   dispositivos: Dispositivo[] = [];
   totalDispositivos = 0;
@@ -234,9 +236,9 @@ export class PerfilPage implements OnInit {
       return;
     }
 
-    // Limit to 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      this.profileError = 'La imagen no debe superar 5 MB.';
+    // Limit file size
+    if (file.size > this.MAX_PHOTO_SIZE_MB * 1024 * 1024) {
+      this.profileError = `La imagen no debe superar ${this.MAX_PHOTO_SIZE_MB} MB.`;
       return;
     }
 
@@ -275,10 +277,6 @@ export class PerfilPage implements OnInit {
       next: (res) => {
         this.uploadingPhoto = false;
         this.usuario = res.usuario;
-        // Clear picture locally if backend returns empty string
-        if (this.usuario && !this.usuario.picture) {
-          this.usuario.picture = undefined;
-        }
         this.profileMsg = 'Foto eliminada.';
         setTimeout(() => (this.profileMsg = ''), 3000);
       },

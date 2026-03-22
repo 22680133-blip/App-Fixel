@@ -28,7 +28,7 @@
   </div>
 </div>
 <input type="file" #fileInput accept="image/*" (change)="onFotoSeleccionada($event)" style="display:none;">
-<button *ngIf="usuario?.picture" class="remove-photo-btn" (click)="eliminarFoto()">✕ Quitar foto</button>
+<button *ngIf="usuario?.picture" class="remove-photo-btn" (click)="eliminarFoto(); $event.stopPropagation()">✕ Quitar foto</button>
 <p class="uploading-msg" *ngIf="uploadingPhoto">⏳ Subiendo foto...</p>
 
 <h3>{{usuario?.nombre}}</h3>
