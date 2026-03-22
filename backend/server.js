@@ -24,14 +24,18 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   : null; // null = allow all origins in development
 
 const corsOptions = {
-  origin: allowedOrigins === null ? '*' : function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: allowedOrigins === null
+    ? true // reflect request origin in development (supports credentials)
+    : function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        console.warn(`⚠️ CORS bloqueó origen: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      },
+  credentials: true,
 };
 
 // Rate limiting para rutas de autenticación (más restrictivo)

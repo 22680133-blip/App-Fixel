@@ -61,7 +61,7 @@ export class Pantalla3Page implements OnInit {
     document.head.appendChild(script);
   }
 
-  private initializeGoogleButton() {
+  private initializeGoogleButton(retries = 3) {
     const google = (window as any).google;
     if (!google?.accounts?.id) return;
 
@@ -81,11 +81,13 @@ export class Pantalla3Page implements OnInit {
           theme: 'filled_black',
           size: 'large',
         });
+        this.zone.run(() => {
+          this.googleReady = true;
+        });
+      } else if (retries > 0) {
+        // Container may not be in DOM yet — retry after a short delay
+        setTimeout(() => this.initializeGoogleButton(retries - 1), 500);
       }
-
-      this.zone.run(() => {
-        this.googleReady = true;
-      });
     } catch (err) {
       console.error(
         `[Google Sign-In] Error al inicializar. Origen actual: "${window.location.origin}". ` +
@@ -133,7 +135,12 @@ export class Pantalla3Page implements OnInit {
         this.router.navigate(['/pantalla4'], { replaceUrl: true });
       },
       error: (err) => {
-        const mensaje = err.error?.mensaje || 'Error al registrar';
+        let mensaje: string;
+        if (err.status === 0) {
+          mensaje = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+        } else {
+          mensaje = err.error?.mensaje || 'Error al registrar. Intenta de nuevo.';
+        }
         if (mensaje.includes('existe') || mensaje.includes('registrado')) {
           this.emailError = 'Este correo ya está registrado';
         } else {
@@ -151,7 +158,7 @@ export class Pantalla3Page implements OnInit {
     if (!response.credential) {
       this.zone.run(() => {
         this.isLoading = false;
-        alert('Error en Google Sign-In');
+        this.emailError = 'No se pudo obtener el token de Google. Intenta de nuevo.';
       });
       return;
     }
@@ -160,8 +167,12 @@ export class Pantalla3Page implements OnInit {
       this.isLoading = true;
       this.auth.loginWithGoogle(response.credential).subscribe({
         next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
-        error: () => {
-          alert('Error en autenticación con Google');
+        error: (err) => {
+          if (err.status === 0) {
+            this.emailError = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+          } else {
+            this.emailError = err.error?.mensaje || 'Error en autenticación con Google';
+          }
           this.isLoading = false;
         },
       });
@@ -171,7 +182,7 @@ export class Pantalla3Page implements OnInit {
   loginWithFacebook() {
     const FB = (window as any).FB;
     if (!FB) {
-      alert('Facebook SDK no disponible');
+      this.emailError = 'Facebook SDK no disponible. Intenta de nuevo.';
       return;
     }
     FB.login(
@@ -182,8 +193,12 @@ export class Pantalla3Page implements OnInit {
           const { accessToken, userID } = fbResponse.authResponse;
           this.auth.loginWithFacebook(accessToken, userID).subscribe({
             next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
-            error: () => {
-              alert('Error en autenticación con Facebook');
+            error: (err) => {
+              if (err.status === 0) {
+                this.emailError = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+              } else {
+                this.emailError = err.error?.mensaje || 'Error en autenticación con Facebook';
+              }
               this.isLoading = false;
             },
           });

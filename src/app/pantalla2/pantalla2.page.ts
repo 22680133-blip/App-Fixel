@@ -60,7 +60,7 @@ export class Pantalla2Page implements OnInit {
     document.head.appendChild(script);
   }
 
-  private initializeGoogleButton() {
+  private initializeGoogleButton(retries = 3) {
     const google = (window as any).google;
     if (!google?.accounts?.id) return;
 
@@ -80,11 +80,13 @@ export class Pantalla2Page implements OnInit {
           theme: 'filled_black',
           size: 'large',
         });
+        this.zone.run(() => {
+          this.googleReady = true;
+        });
+      } else if (retries > 0) {
+        // Container may not be in DOM yet — retry after a short delay
+        setTimeout(() => this.initializeGoogleButton(retries - 1), 500);
       }
-
-      this.zone.run(() => {
-        this.googleReady = true;
-      });
     } catch (err) {
       console.error(
         `[Google Sign-In] Error al inicializar. Origen actual: "${window.location.origin}". ` +
@@ -114,7 +116,12 @@ export class Pantalla2Page implements OnInit {
     this.auth.login(this.email, this.password).subscribe({
       next: () => this.navegarTrasLogin(),
       error: (err) => {
-        const mensaje = err.error?.mensaje || 'Error en autenticación';
+        let mensaje: string;
+        if (err.status === 0) {
+          mensaje = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+        } else {
+          mensaje = err.error?.mensaje || 'Error en autenticación';
+        }
         if (mensaje.includes('no encontrado')) {
           this.emailError = 'Correo no registrado';
         } else if (mensaje.includes('incorrecta')) {
@@ -133,7 +140,7 @@ export class Pantalla2Page implements OnInit {
   private handleGoogleResponse(response: any) {
     if (!response.credential) {
       this.zone.run(() => {
-        alert('Error al obtener token de Google');
+        this.passwordError = 'No se pudo obtener el token de Google. Intenta de nuevo.';
       });
       return;
     }
@@ -142,8 +149,12 @@ export class Pantalla2Page implements OnInit {
       this.isLoading = true;
       this.auth.loginWithGoogle(response.credential).subscribe({
         next: () => this.navegarTrasLogin(),
-        error: () => {
-          alert('Error en autenticación con Google');
+        error: (err) => {
+          if (err.status === 0) {
+            this.passwordError = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+          } else {
+            this.passwordError = err.error?.mensaje || 'Error en autenticación con Google';
+          }
           this.isLoading = false;
         },
       });
@@ -168,8 +179,12 @@ export class Pantalla2Page implements OnInit {
           const { accessToken, userID } = fbResponse.authResponse;
           this.auth.loginWithFacebook(accessToken, userID).subscribe({
             next: () => this.navegarTrasLogin(),
-            error: () => {
-              alert('Error en autenticación con Facebook');
+            error: (err) => {
+              if (err.status === 0) {
+                this.passwordError = 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+              } else {
+                this.passwordError = err.error?.mensaje || 'Error en autenticación con Facebook';
+              }
               this.isLoading = false;
             },
           });
