@@ -69,13 +69,6 @@ export class Pantalla2Page implements OnInit {
         client_id: environment.googleClientId,
         callback: (response: any) => this.handleGoogleResponse(response),
         use_fedcm_for_prompt: true,
-        allowed_parent_origin: [
-          'http://localhost:8100',
-          'http://localhost:4200',
-          'http://localhost',
-          'capacitor://localhost',
-          'ionic://localhost',
-        ],
       });
 
       // Render a real Google Sign-In button (more reliable than One Tap prompt)
