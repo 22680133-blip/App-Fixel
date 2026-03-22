@@ -80,9 +80,8 @@ export class Pantalla5Page implements OnInit {
           this.deviceService
             .crearDispositivo({
               nombre: 'Mi Refrigerador',
-              alimentos: nombres,
-              tempMin: this.tempMin,
-              tempMax: this.tempMax,
+              limiteMin: this.tempMin,
+              limiteMax: this.tempMax,
             })
             .subscribe({
               next: (created) => {

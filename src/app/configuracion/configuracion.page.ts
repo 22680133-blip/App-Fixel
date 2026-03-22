@@ -39,10 +39,8 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     if (active) {
       this.dispositivoId = active.id;
       this.deviceName = active.nombre;
-      this.minTemp = active.tempMin;
-      this.maxTemp = active.tempMax;
-      this.unit = active.unidad;
-      this.alerts = active.alertas;
+      this.minTemp = active.limiteMin;
+      this.maxTemp = active.limiteMax;
       return;
     }
 
@@ -53,10 +51,8 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
           const d: Dispositivo = res.devices[0];
           this.dispositivoId = d.id;
           this.deviceName = d.nombre;
-          this.minTemp = d.tempMin;
-          this.maxTemp = d.tempMax;
-          this.unit = d.unidad;
-          this.alerts = d.alertas;
+          this.minTemp = d.limiteMin;
+          this.maxTemp = d.limiteMax;
 
           // Guardar como dispositivo activo
           this.deviceService.setActiveDevice(d);
@@ -78,10 +74,8 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     this.deviceService
       .guardarConfiguracion(this.dispositivoId, {
         nombre: this.deviceName,
-        tempMin: this.minTemp,
-        tempMax: this.maxTemp,
-        unidad: this.unit,
-        alertas: this.alerts,
+        limiteMin: this.minTemp,
+        limiteMax: this.maxTemp,
       })
       .subscribe({
         next: (res) => {

@@ -58,27 +58,27 @@ let client = null;
 
 /**
  * Procesa un mensaje MQTT recibido del ESP32.
- * Busca el dispositivo por mqttClientId y guarda la lectura.
+ * Busca el dispositivo por externalDeviceId y guarda la lectura.
  */
 const handleMessage = async (topic, message) => {
   try {
-    // Extraer mqttClientId del tópico: fixel/{mqttClientId}/data
+    // Extraer el identificador del tópico: fixel/{deviceIdentifier}/data
     const parts = topic.split('/');
     if (parts.length !== 3) return;
-    const mqttClientId = parts[1];
+    const deviceIdentifier = parts[1];
 
     const payload = JSON.parse(message.toString());
     const { temperatura, humedad, compresor, energia } = payload;
 
     if (temperatura === undefined) {
-      console.warn(`⚠️ Mensaje sin temperatura del dispositivo: ${mqttClientId}`);
+      console.warn(`⚠️ Mensaje sin temperatura del dispositivo: ${deviceIdentifier}`);
       return;
     }
 
-    // Buscar el dispositivo por su mqttClientId
-    const device = await Device.findOne({ where: { mqttClientId } });
+    // Buscar el dispositivo por su externalDeviceId (columna device_id)
+    const device = await Device.findOne({ where: { externalDeviceId: deviceIdentifier } });
     if (!device) {
-      console.warn(`⚠️ Dispositivo no registrado: ${mqttClientId}`);
+      console.warn(`⚠️ Dispositivo no registrado: ${deviceIdentifier}`);
       return;
     }
 
@@ -95,7 +95,7 @@ const handleMessage = async (topic, message) => {
     device.status = energia === 'Falla' ? 'alerta' : 'activo';
     await device.save();
 
-    console.log(`📡 [${mqttClientId}] Temperatura: ${temperatura}°C | Energía: ${energia}`);
+    console.log(`📡 [${deviceIdentifier}] Temperatura: ${temperatura}°C | Energía: ${energia}`);
   } catch (err) {
     console.error('❌ Error procesando mensaje MQTT:', err.message);
   }
