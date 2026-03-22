@@ -1,0 +1,147 @@
+<ion-content class="config-page">
+
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <span class="back" (click)="goBack()" style="cursor: pointer;">←</span>
+  <h2>Configuración</h2>
+</div>
+
+
+<!-- NOMBRE DISPOSITIVO -->
+
+<div class="device-card">
+
+  <div class="device-title">
+    <img src="assets/img/device.png">
+    <span>Nombre del Dispositivo</span>
+  </div>
+
+  <input
+  type="text"
+  [(ngModel)]="deviceName"
+  class="device-input"
+  placeholder="Ej: Refrigerador Cocina">
+
+</div>
+
+
+
+<!-- RANGO TEMPERATURA -->
+
+<div class="temp-card">
+
+<h3>Rango de Temperatura</h3>
+
+
+<label>Temperatura Mínima</label>
+
+<div class="temp-row">
+<span>{{minTemp}}°C</span>
+</div>
+
+<input
+type="range"
+min="-5"
+max="10"
+[(ngModel)]="minTemp">
+
+
+<label>Temperatura Máxima</label>
+
+<div class="temp-row">
+<span class="max">{{maxTemp}}°C</span>
+</div>
+
+<input
+type="range"
+min="0"
+max="15"
+[(ngModel)]="maxTemp">
+
+
+<div class="info-box">
+💡 Rango recomendado: 2°C - 8°C para conservar alimentos de forma segura.
+</div>
+
+</div>
+
+
+
+<!-- ALERTAS -->
+
+<div class="alert-card">
+
+<div class="alert-left">
+
+<img src="assets/img/bell.png">
+
+<div>
+<h4>Alertas</h4>
+<p>Notificar temperaturas anormales</p>
+</div>
+
+</div>
+
+<label class="switch">
+
+<input type="checkbox" [(ngModel)]="alerts">
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+
+
+<!-- UNIDAD -->
+
+<div class="unit-card">
+
+<h4>Unidad de Temperatura</h4>
+
+<div class="unit-buttons">
+
+<button
+(click)="unit='C'"
+[class.active]="unit=='C'">
+
+Celsius (°C)
+
+</button>
+
+
+<button
+(click)="unit='F'"
+[class.active]="unit=='F'">
+
+Fahrenheit (°F)
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- BOTON -->
+
+<button class="save-btn" (click)="guardar()">
+
+Guardar Configuración
+
+</button>
+
+
+<p class="note">
+
+Los cambios se aplicarán inmediatamente al monitoreo de temperatura.
+
+</p>
+
+</div>
+
+</ion-content>

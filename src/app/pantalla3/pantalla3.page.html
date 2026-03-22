@@ -1,0 +1,113 @@
+<ion-content class="login-content" fullscreen="true">
+  <div class="shared-container">
+    <div class="shared-logo">
+      <img src="assets/img/logofrixel-.png" alt="logo">
+    </div>
+    <h2 class="shared-title">Crear Cuenta</h2>
+    <p class="subtitle">Regístrate para comenzar</p>
+    <form (ngSubmit)="register()" #registerForm="ngForm" novalidate>
+      <!-- NOMBRE -->
+      <label class="label">Nombre Completo</label>
+      <div class="input-group" [ngClass]="{ 'error': nombreError }">
+        <img src="assets/img/icon-user.png" class="icon-img">
+        <input
+          type="text"
+          name="nombre"
+          placeholder="Garcia Lopez Ivan"
+          [(ngModel)]="nombre">
+      </div>
+      <!-- NOMBRE ERROR -->
+      <div class="input-error" *ngIf="nombreError">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>{{ nombreError }}</span>
+      </div>
+      <!-- EMAIL -->
+      <label class="label">Correo Electrónico</label>
+      <div class="input-group" [ngClass]="{ 'error': emailError }">
+        <img src="assets/img/icon-mail.png" class="icon-img">
+        <input
+          type="email"
+          name="email"
+          placeholder="tu@gmail.com"
+          [(ngModel)]="email">
+      </div>
+      <!-- EMAIL ERROR -->
+      <div class="input-error" *ngIf="emailError">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>{{ emailError }}</span>
+      </div>
+      <!-- PASSWORD -->
+      <label class="label">Contraseña</label>
+      <div class="input-group" [ngClass]="{ 'error': passwordError }">
+        <img src="assets/img/icon-lock.png" class="icon-img">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          name="password"
+          placeholder="********"
+          [(ngModel)]="password">
+        <button type="button" class="eye-btn" (click)="togglePassword()">
+          <img [src]="showPassword ? 'assets/img/icon-eye.png' : 'assets/img/icon-eye-off.png'" class="eye-img">
+        </button>
+      </div>
+      <!-- PASSWORD ERROR -->
+      <div class="input-error" *ngIf="passwordError">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>{{ passwordError }}</span>
+      </div>
+      <!-- CONFIRM PASSWORD -->
+      <label class="label">Confirmar Contraseña</label>
+      <div class="input-group" [ngClass]="{ 'error': confirmPasswordError }">
+        <img src="assets/img/icon-lock.png" class="icon-img">
+        <input
+          [type]="showConfirm ? 'text' : 'password'"
+          name="confirmPassword"
+          placeholder="********"
+          [(ngModel)]="confirmPassword">
+        <button type="button" class="eye-btn" (click)="toggleConfirm()">
+          <img [src]="showConfirm ? 'assets/img/icon-eye.png' : 'assets/img/icon-eye-off.png'" class="eye-img">
+        </button>
+      </div>
+      <!-- CONFIRM PASSWORD ERROR -->
+      <div class="input-error" *ngIf="confirmPasswordError">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>{{ confirmPasswordError }}</span>
+      </div>
+
+      <!-- SOCIAL LOGIN -->
+      <div class="divider-container">
+        <div class="divider-line"></div>
+        <span class="divider-text">O</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="social-login">
+        <button 
+          type="button" 
+          class="social-btn gmail-btn" 
+          aria-label="Iniciar sesión con Gmail" 
+          (click)="loginWithGoogle()"
+          [disabled]="isLoading">
+          <img src="assets/img/icon-gmail.png" alt="Gmail" class="social-icon">
+        </button>
+        <button 
+          type="button" 
+          class="social-btn facebook-btn" 
+          aria-label="Iniciar sesión con Facebook" 
+          (click)="loginWithFacebook()"
+          [disabled]="isLoading">
+          <img src="assets/img/icon-facebook.png" alt="Facebook" class="social-icon">
+        </button>
+      </div>
+      
+      <!-- BOTON -->
+      <button class="login-btn" type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+      </button>
+
+      <!-- ENLACE IR A LOGIN -->
+      <div class="register" style="margin-top: 18px; text-align: center;">
+        ¿Ya tienes cuenta? <span (click)="goBack()" style="cursor: pointer; color: #ff3d6e; font-weight: 700;">Inicia sesión</span>
+      </div>
+    </form>
+  </div>
+</ion-content>

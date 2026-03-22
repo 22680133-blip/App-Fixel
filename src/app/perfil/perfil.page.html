@@ -1,0 +1,179 @@
+<ion-content class="profile-page">
+
+<div class="container">
+
+<!-- HEADER -->
+
+<div class="header">
+
+<span class="back" (click)="goBack()" style="cursor: pointer;">←</span>
+
+<h2> Mi Perfil</h2>
+
+</div>
+
+
+
+<!-- USUARIO -->
+
+<div class="user-card">
+
+<div class="avatar">
+I
+</div>
+
+<h3>{{usuario?.nombre}}</h3>
+
+<p class="status">Usuario activo</p>
+
+
+<div class="user-info">
+
+<div class="info-row">
+
+<img src="assets/img/correo.png">
+
+<span>{{usuario?.email}}</span>
+
+</div>
+
+<div class="info-row">
+
+<img src="assets/img/llamada.png">
+
+<span>+52 777 000 0000</span>
+
+</div>
+
+<div class="info-row">
+
+<img src="assets/img/ubicacion.png">
+
+<span>Morelos, México</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- DISPOSITIVOS -->
+
+<div class="devices-card">
+
+  <h3>Mis Dispositivos</h3>
+
+  <!-- SI NO HAY DISPOSITIVOS -->
+
+  <div *ngIf="dispositivos.length === 0" class="device">
+
+    <div class="device-left">
+      <img src="assets/img/device.png">
+
+      <div>
+        <h4>No tienes dispositivos</h4>
+        <p>Agrega uno para comenzar</p>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- LISTA DE DISPOSITIVOS -->
+
+  <div class="device" *ngFor="let device of dispositivos">
+
+    <div class="device-left">
+
+      <img src="assets/img/device.png">
+
+      <div>
+
+        <h4>{{device.nombre}}</h4>
+
+        <p *ngIf="device.status === 'activo'">
+            Activo
+        </p>
+
+        <p *ngIf="device.status !== 'activo'">
+          Desconectado
+        </p>
+
+      </div>
+
+    </div>
+
+    <button class="config-btn">
+      Configurar →
+    </button>
+
+  </div>
+
+
+  <!-- BOTON AGREGAR -->
+
+  <button class="add-device" (click)="agregarDispositivo()">
+    + Agregar dispositivo
+  </button>
+
+</div>
+
+
+
+<!-- ESTADISTICAS -->
+
+<div class="stats-card">
+
+<h3>Estadísticas</h3>
+
+<div class="stats">
+
+<div>
+
+<h2>{{totalDispositivos}}</h2>
+
+<p>Dispositivos</p>
+
+</div>
+
+<div>
+
+<h2>{{activos}}</h2>
+
+<p>Activos</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- CONFIGURACION -->
+
+<div class="settings-card">
+
+<h3>⚙️ Configuración</h3>
+
+<button>🔑 Cambiar contraseña</button>
+
+<button>🔔 Notificaciones</button>
+
+<button>🔒 Privacidad</button>
+
+</div>
+
+
+<p class="version">
+
+Frixel v1.0
+
+</p>
+
+</div>
+
+</ion-content>

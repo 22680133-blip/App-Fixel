@@ -1,0 +1,33 @@
+<ion-content class="food-page">
+
+  <div class="container">
+
+    <h1 class="title">¿Qué vas a guardar?</h1>
+    <p class="subtitle">
+      Selecciona los tipos de alimentos que almacenarás
+    </p>
+
+    <div class="food-grid">
+
+      <div 
+        *ngFor="let food of foods" 
+        class="food-card"
+        [ngClass]="{ 'selected': isSelected(food.id) }"
+        (click)="toggleFood(food.id)">
+        <div class="icon-circle">
+          <img [src]="food.icon">
+        </div>
+        <h3>{{ food.name }}</h3>
+        <p>{{ food.desc }}</p>
+        <span>{{ food.temp }}</span>
+      </div>
+
+    </div>
+
+    <button class="continue-btn" (click)="continuar()">
+      Continuar
+    </button>
+
+  </div>
+
+</ion-content>

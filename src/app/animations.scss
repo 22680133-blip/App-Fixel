@@ -1,0 +1,132 @@
+/* Estilos globales de animaciones y transiciones */
+
+/* Transición de entrada/salida de páginas */
+ion-router-outlet {
+  --ion-transition-duration: 400ms;
+}
+
+/* Animación fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animación fade-out */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Animación slide-in-right */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animación slide-out-left */
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+/* Aplicar animación a contenedores de página */
+ion-content {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Botones con efecto hover */
+button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Cards con efecto hover */
+.feature-card,
+.food-card,
+.device-card,
+.alert-card,
+.temperature-card,
+.status-card,
+.device,
+.user-card,
+.devices-card,
+.settings-card,
+.temp-card,
+.alert-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.feature-card:hover,
+.food-card:hover,
+.device:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.2);
+}
+
+/* Input Focus */
+input:focus,
+textarea:focus {
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+}
+
+/* Transición de etiquetas */
+label {
+  transition: all 0.2s ease;
+}
+
+/* Efecto ripple para elementos clickeables */
+.clickable {
+  position: relative;
+  overflow: hidden;
+}
+
+.clickable::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.clickable:active::before {
+  width: 300px;
+  height: 300px;
+}

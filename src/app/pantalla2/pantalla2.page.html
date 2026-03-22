@@ -1,0 +1,91 @@
+<ion-content class="login-content" fullscreen="true">
+  <div class="shared-container">
+    <div class="shared-logo">
+      <img src="assets/img/logofixel.png" alt="Logo">
+    </div>
+    <h2 class="shared-title">Bienvenido</h2>
+    <p class="subtitle">Inicia sesión para continuar</p>
+
+      <form (ngSubmit)="login()" #loginForm="ngForm" novalidate>
+
+        <!-- EMAIL -->
+        <label class="label">Correo Electrónico</label>
+        <div class="input-group" [ngClass]="{ 'error': emailError }">
+          <img src="assets/img/icon-mail.png" alt="mail" class="icon-img">
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="correo@gmail.com"
+            autocomplete="email">
+        </div>
+        <!-- EMAIL ERROR -->
+        <div class="input-error" *ngIf="emailError">
+          <ion-icon name="alert-circle"></ion-icon>
+          <span>{{ emailError }}</span>
+        </div>
+
+        <!-- PASSWORD -->
+        <label class="label">Contraseña</label>
+        <div class="input-group" [ngClass]="{ 'error': passwordError }">
+          <img src="assets/img/icon-lock.png" alt="lock" class="icon-img">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="********"
+            autocomplete="current-password">
+          <button type="button" class="eye-btn" (click)="togglePassword()" aria-label="Mostrar contraseña">
+            <img [src]="showPassword ? 'assets/img/icon-eye.png' : 'assets/img/icon-eye-off.png'" alt="eye" class="eye-img">
+          </button>
+        </div>
+        <!-- PASSWORD ERROR -->
+        <div class="input-error" *ngIf="passwordError">
+          <ion-icon name="alert-circle"></ion-icon>
+          <span>{{ passwordError }}</span>
+        </div>
+
+        <div class="forgot">¿Olvidaste tu contraseña?</div>
+
+        <button class="login-btn" type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Iniciando...' : 'Iniciar Sesión' }}
+        </button>
+
+        <div class="register">
+          ¿No tienes cuenta? <span (click)="goRegister()">Regístrate</span>
+        </div>
+
+        <!-- DIVISOR -->
+        <div class="divider-container">
+          <div class="divider-line"></div>
+          <span class="divider-text">O</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- SOCIAL LOGIN -->
+        <div class="social-login">
+          <button 
+            type="button" 
+            class="social-btn gmail-btn" 
+            aria-label="Iniciar sesión con Gmail" 
+            (click)="loginWithGoogle()"
+            [disabled]="isLoading">
+            <img src="assets/img/icon-gmail.png" alt="Gmail" class="social-icon">
+          </button>
+          <button 
+            type="button" 
+            class="social-btn facebook-btn" 
+            aria-label="Iniciar sesión con Facebook" 
+            (click)="loginWithFacebook()"
+            [disabled]="isLoading">
+            <img src="assets/img/icon-facebook.png" alt="Facebook" class="social-icon">
+          </button>
+        </div>
+
+        <!-- Elemento oculto para Google Sign-In -->
+        <div id="google-signin-button" style="display: none;"></div>
+      </form>
+    
+
+  </div>
+</ion-content>

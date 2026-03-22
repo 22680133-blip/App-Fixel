@@ -1,0 +1,118 @@
+<ion-content class="dashboard-page">
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+
+    <div class="fridge-info">
+      <img src="assets/img/device.png" class="fridge-icon">
+      <div>
+        <h2>Refrigerador Cocina</h2>
+        <p>Última actualización: 20:24</p>
+      </div>
+      
+    </div>
+    <div class="icons-section">
+      <img src="assets/img/usuario.png" class="user-icon" (click)="goToPerfil()" style="cursor: pointer;">
+      <img src="assets/img/settings.png" class="settings-icon" (click)="goToConfiguracion()" style="cursor: pointer;">
+    </div>
+
+  </div>
+
+
+  <!-- USUARIO -->
+  <div class="user">
+    <div class="user-left">
+      <img src="assets/img/ola.png">
+      <span>Hola, Ivan</span>
+    </div>
+
+    <span class="logout">Cerrar sesión</span>
+  </div>
+
+
+  <!-- ESTADO DISPOSITIVO -->
+  <div class="device-card">
+
+    <div class="device-left">
+      <img src="assets/img/key.png">
+      <span>Dispositivo Conectado</span>
+    </div>
+
+    <div class="status-dot"></div>
+
+  </div>
+
+
+  <!-- ALERTA -->
+  <div class="alert-card">
+
+    <img src="assets/img/alert.png">
+
+    <div>
+      <h4>Posible Falla de Energía</h4>
+      <p>Se detectó una interrupción en el suministro eléctrico. El refrigerador podría no estar funcionando.</p>
+    </div>
+
+  </div>
+
+
+  <!-- TEMPERATURA ACTUAL -->
+  <div class="temperature-card">
+
+    <h3>🌡️ Temperatura Actual</h3>
+
+    <div class="temp-value">
+      {{temperatura}}°C
+    </div>
+
+  </div>
+
+
+  <!-- MIN MAX -->
+  <div class="temp-range">
+
+    <div class="min-card">
+      <h4>❄️ Mínimo</h4>
+      <p>{{minTemp}}°C</p>
+    </div>
+
+    <div class="max-card">
+      <h4>🔥 Máximo</h4>
+      <p>{{maxTemp}}°C</p>
+    </div>
+
+  </div>
+
+
+  <!-- HISTORIAL -->
+  <div class="history-card">
+
+    <h4>📊 Historial (24h)</h4>
+
+    <img src="assets/img/chart.png">
+
+  </div>
+
+
+  <!-- ESTADOS -->
+  <div class="status-grid">
+
+    <div class="status-card">
+      <img src="assets/img/energy.png">
+      <p>Energía</p>
+      <span>{{energia}}</span>
+    </div>
+
+    <div class="status-card">
+      <img src="assets/img/compressor.png">
+      <p>Compresor</p>
+      <span>{{compresor}}</span>
+    </div>
+
+  </div>
+
+</div>
+
+</ion-content>

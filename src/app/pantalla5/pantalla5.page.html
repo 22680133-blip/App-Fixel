@@ -1,0 +1,82 @@
+<ion-content class="confirm-page">
+
+  <div class="container">
+
+    <!-- Icono check -->
+    <div class="check-circle">
+      <img src="assets/img/check.png">
+    </div>
+
+    <h1 class="title">Configuración Lista</h1>
+    <p class="subtitle">
+      Basada en tus alimentos seleccionados
+    </p>
+
+    <!-- Alimentos seleccionados -->
+    <div class="card">
+
+      <p class="card-title">Alimentos Seleccionados</p>
+
+      <div class="selected-foods-list">
+        <div *ngFor="let food of selectedFoods" class="selected-food">
+          <img [src]="food.icon">
+          <span>{{ food.name }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Temperatura -->
+    <div class="temp-card">
+
+      <h2>Temperatura Óptima</h2>
+
+      <div class="temp-values">
+
+        <div>
+          <strong>{{ tempMin }}°C</strong>
+          <p>Mínima</p>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div>
+          <strong>{{ tempMax }}°C</strong>
+          <p>Máxima</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Consejo -->
+    <div class="tip-card">
+
+      <div class="tip-icon">
+        <img src="assets/img/tip.png">
+      </div>
+
+      <div class="tip-text">
+
+        <strong>Consejo:</strong>
+        Este rango de temperatura es ideal para conservar
+        todos los alimentos seleccionados de forma segura.
+
+      </div>
+
+    </div>
+
+    <!-- Botones -->
+
+    <button class="confirm-btn" (click)="continuar()">
+      Confirmar y Continuar
+    </button>
+
+    <button class="back-btn" (click)="goBack()">
+      Volver y Seleccionar
+    </button>
+
+  </div>
+
+</ion-content>
+
