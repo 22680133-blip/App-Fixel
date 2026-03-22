@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, NgZone } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ export class Pantalla2Page implements OnInit {
   password = '';
   showPassword = false;
   isLoading = false;
+  googleReady = false;
 
   emailError = '';
   passwordError = '';
@@ -27,6 +28,7 @@ export class Pantalla2Page implements OnInit {
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly zone = inject(NgZone);
 
   ngOnInit() {
     this.loadGoogleScript();
@@ -39,13 +41,49 @@ export class Pantalla2Page implements OnInit {
   }
 
   private loadGoogleScript() {
-    if ((window as any).google) return;
+    if ((window as any).google?.accounts) {
+      this.initializeGoogleButton();
+      return;
+    }
+
+    const existing = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    if (existing) {
+      existing.addEventListener('load', () => this.initializeGoogleButton());
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
+    script.onload = () => this.initializeGoogleButton();
     document.head.appendChild(script);
+  }
+
+  private initializeGoogleButton() {
+    const google = (window as any).google;
+    if (!google?.accounts?.id) return;
+
+    google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: any) => this.handleGoogleResponse(response),
+      use_fedcm_for_prompt: true,
+    });
+
+    // Render a real Google Sign-In button (more reliable than One Tap prompt)
+    const container = document.getElementById('google-btn-login');
+    if (container) {
+      google.accounts.id.renderButton(container, {
+        type: 'icon',
+        shape: 'circle',
+        theme: 'filled_black',
+        size: 'large',
+      });
+    }
+
+    this.zone.run(() => {
+      this.googleReady = true;
+    });
   }
 
   togglePassword() {
@@ -82,35 +120,25 @@ export class Pantalla2Page implements OnInit {
   }
 
   // ============================================================
-  // Login con Google
+  // Login con Google — handled by the rendered Google button
   // ============================================================
-  loginWithGoogle() {
-    if (!(window as any).google) {
-      alert('Google SDK no cargado. Intenta de nuevo en un momento.');
-      return;
-    }
-
-    (window as any).google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response: any) => this.handleGoogleResponse(response),
-    });
-
-    (window as any).google.accounts.id.prompt();
-  }
-
   private handleGoogleResponse(response: any) {
     if (!response.credential) {
-      alert('Error al obtener token de Google');
+      this.zone.run(() => {
+        alert('Error al obtener token de Google');
+      });
       return;
     }
 
-    this.isLoading = true;
-    this.auth.loginWithGoogle(response.credential).subscribe({
-      next: () => this.navegarTrasLogin(),
-      error: () => {
-        alert('Error en autenticación con Google');
-        this.isLoading = false;
-      },
+    this.zone.run(() => {
+      this.isLoading = true;
+      this.auth.loginWithGoogle(response.credential).subscribe({
+        next: () => this.navegarTrasLogin(),
+        error: () => {
+          alert('Error en autenticación con Google');
+          this.isLoading = false;
+        },
+      });
     });
   }
 
@@ -127,14 +155,16 @@ export class Pantalla2Page implements OnInit {
     FB.login(
       (fbResponse: any) => {
         if (!fbResponse.authResponse) return;
-        this.isLoading = true;
-        const { accessToken, userID } = fbResponse.authResponse;
-        this.auth.loginWithFacebook(accessToken, userID).subscribe({
-          next: () => this.navegarTrasLogin(),
-          error: () => {
-            alert('Error en autenticación con Facebook');
-            this.isLoading = false;
-          },
+        this.zone.run(() => {
+          this.isLoading = true;
+          const { accessToken, userID } = fbResponse.authResponse;
+          this.auth.loginWithFacebook(accessToken, userID).subscribe({
+            next: () => this.navegarTrasLogin(),
+            error: () => {
+              alert('Error en autenticación con Facebook');
+              this.isLoading = false;
+            },
+          });
         });
       },
       { scope: 'public_profile,email' }

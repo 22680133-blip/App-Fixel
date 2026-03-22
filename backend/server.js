@@ -12,11 +12,26 @@ const readingRoutes = require('./src/routes/reading.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS: en producción, restringe los orígenes permitidos con la variable ALLOWED_ORIGINS
+// CORS: en producción, permite orígenes configurados + orígenes de Capacitor/Ionic
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      ...(process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
+      'capacitor://localhost',
+      'ionic://localhost',
+      'http://localhost',
+      'http://localhost:8100',
+    ]
+  : null; // null = allow all origins in development
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim())
-    : '*',
+  origin: allowedOrigins === null ? '*' : function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
 };
 
 // Rate limiting para rutas de autenticación (más restrictivo)

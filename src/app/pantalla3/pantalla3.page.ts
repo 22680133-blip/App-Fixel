@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, NgZone } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +22,7 @@ export class Pantalla3Page implements OnInit {
   showPassword = false;
   showConfirm = false;
   isLoading = false;
+  googleReady = false;
 
   nombreError = '';
   emailError = '';
@@ -31,6 +32,7 @@ export class Pantalla3Page implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly zone = inject(NgZone);
 
   ngOnInit() {
     this.loadGoogleScript();
@@ -40,12 +42,49 @@ export class Pantalla3Page implements OnInit {
   }
 
   private loadGoogleScript() {
-    if ((window as any).google) return;
+    if ((window as any).google?.accounts) {
+      this.initializeGoogleButton();
+      return;
+    }
+
+    const existing = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+    if (existing) {
+      existing.addEventListener('load', () => this.initializeGoogleButton());
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
+    script.onload = () => this.initializeGoogleButton();
     document.head.appendChild(script);
+  }
+
+  private initializeGoogleButton() {
+    const google = (window as any).google;
+    if (!google?.accounts?.id) return;
+
+    google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: any) => this.handleGoogleResponse(response),
+      use_fedcm_for_prompt: true,
+    });
+
+    // Render a real Google Sign-In button (more reliable than One Tap prompt)
+    const container = document.getElementById('google-btn-register');
+    if (container) {
+      google.accounts.id.renderButton(container, {
+        type: 'icon',
+        shape: 'circle',
+        theme: 'filled_black',
+        size: 'large',
+      });
+    }
+
+    this.zone.run(() => {
+      this.googleReady = true;
+    });
   }
 
   togglePassword() { this.showPassword = !this.showPassword; }
@@ -98,38 +137,26 @@ export class Pantalla3Page implements OnInit {
   }
 
   // ============================================================
-  // Registro / Login con Google
+  // Registro / Login con Google — handled by the rendered Google button
   // ============================================================
-  loginWithGoogle() {
-    if (!(window as any).google) {
-      alert('Google Sign-In no disponible');
-      return;
-    }
-
-    this.isLoading = true;
-
-    (window as any).google.accounts.id.initialize({
-      client_id: environment.googleClientId,
-      callback: (response: any) => this.handleGoogleResponse(response),
-      use_fedcm_for_prompt: false,
-    });
-
-    (window as any).google.accounts.id.prompt();
-  }
-
   private handleGoogleResponse(response: any) {
     if (!response.credential) {
-      this.isLoading = false;
-      alert('Error en Google Sign-In');
+      this.zone.run(() => {
+        this.isLoading = false;
+        alert('Error en Google Sign-In');
+      });
       return;
     }
 
-    this.auth.loginWithGoogle(response.credential).subscribe({
-      next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
-      error: () => {
-        alert('Error en autenticación con Google');
-        this.isLoading = false;
-      },
+    this.zone.run(() => {
+      this.isLoading = true;
+      this.auth.loginWithGoogle(response.credential).subscribe({
+        next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
+        error: () => {
+          alert('Error en autenticación con Google');
+          this.isLoading = false;
+        },
+      });
     });
   }
 
@@ -142,14 +169,16 @@ export class Pantalla3Page implements OnInit {
     FB.login(
       (fbResponse: any) => {
         if (!fbResponse.authResponse) return;
-        this.isLoading = true;
-        const { accessToken, userID } = fbResponse.authResponse;
-        this.auth.loginWithFacebook(accessToken, userID).subscribe({
-          next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
-          error: () => {
-            alert('Error en autenticación con Facebook');
-            this.isLoading = false;
-          },
+        this.zone.run(() => {
+          this.isLoading = true;
+          const { accessToken, userID } = fbResponse.authResponse;
+          this.auth.loginWithFacebook(accessToken, userID).subscribe({
+            next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
+            error: () => {
+              alert('Error en autenticación con Facebook');
+              this.isLoading = false;
+            },
+          });
         });
       },
       { scope: 'public_profile,email' }
@@ -160,4 +189,3 @@ export class Pantalla3Page implements OnInit {
     this.router.navigate(['/pantalla2']);
   }
 }
-

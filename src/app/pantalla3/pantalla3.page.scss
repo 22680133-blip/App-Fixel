@@ -106,6 +106,35 @@
   transition: transform .12s ease, filter .12s ease;
 }
 
+/* Contenedor de botones sociales */
+.social-login {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Divisor con línea y O */
+.divider-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.divider-text {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .social-btn {
   width: 56px;
   height: 56px;
@@ -151,6 +180,17 @@
       color: #db4437;
     }
   }
+}
+
+/* Google rendered button wrapper */
+.google-btn-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Facebook */
