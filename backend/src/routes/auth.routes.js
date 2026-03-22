@@ -42,7 +42,10 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({ token, usuario: formatUser(user) });
   } catch (error) {
-    console.error('❌ Error register:', error.message);
+    console.error('❌ Error register:', error.message, error.stack);
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
+    }
     return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 });
@@ -71,7 +74,10 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user);
     return res.json({ token, usuario: formatUser(user) });
   } catch (error) {
-    console.error('❌ Error login:', error.message);
+    console.error('❌ Error login:', error.message, error.stack);
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
+    }
     return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 });
@@ -105,7 +111,10 @@ router.post('/google-login', async (req, res) => {
     const jwt = generateToken(user);
     return res.json({ token: jwt, usuario: formatUser(user) });
   } catch (error) {
-    console.error('❌ Error google-login:', error.message);
+    console.error('❌ Error google-login:', error.message, error.stack);
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
+    }
     return res.status(401).json({ mensaje: 'Token de Google inválido o expirado' });
   }
 });
