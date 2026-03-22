@@ -8,10 +8,9 @@
     <div class="fridge-info">
       <img src="assets/img/device.png" class="fridge-icon">
       <div>
-        <h2>Refrigerador Cocina</h2>
-        <p>Última actualización: 20:24</p>
+        <h2>{{deviceNombre}}</h2>
+        <p>Última actualización: {{ultimaActualizacion}}</p>
       </div>
-      
     </div>
     <div class="icons-section">
       <img src="assets/img/usuario.png" class="user-icon" (click)="goToPerfil()" style="cursor: pointer;">
@@ -25,10 +24,10 @@
   <div class="user">
     <div class="user-left">
       <img src="assets/img/ola.png">
-      <span>Hola, Ivan</span>
+      <span>Hola, {{nombreUsuario}}</span>
     </div>
 
-    <span class="logout">Cerrar sesión</span>
+    <span class="logout" (click)="logout()" style="cursor: pointer;">Cerrar sesión</span>
   </div>
 
 
@@ -37,16 +36,16 @@
 
     <div class="device-left">
       <img src="assets/img/key.png">
-      <span>Dispositivo Conectado</span>
+      <span>{{deviceStatus === 'activo' ? 'Dispositivo Conectado' : deviceStatus === 'alerta' ? 'Dispositivo en Alerta' : 'Dispositivo Desconectado'}}</span>
     </div>
 
-    <div class="status-dot"></div>
+    <div class="status-dot" [ngClass]="{'status-activo': deviceStatus === 'activo', 'status-alerta': deviceStatus === 'alerta'}"></div>
 
   </div>
 
 
-  <!-- ALERTA -->
-  <div class="alert-card">
+  <!-- ALERTA ENERGÍA -->
+  <div class="alert-card" *ngIf="energia === 'Falla'">
 
     <img src="assets/img/alert.png">
 

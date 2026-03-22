@@ -31,6 +31,7 @@ log.txt
 
 # Node
 /node_modules
+backend/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -76,3 +77,5 @@ ios/
 # Env
 .env
 .env.local
+backend/.env
+backend/certs/

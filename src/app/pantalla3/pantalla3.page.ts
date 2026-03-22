@@ -1,205 +1,163 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-pantalla3',
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, HttpClientModule],
+  imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './pantalla3.page.html',
   styleUrls: ['./pantalla3.page.scss'],
 })
 export class Pantalla3Page implements OnInit {
+  nombre = '';
+  email = '';
+  password = '';
+  confirmPassword = '';
 
-  // DATOS DEL FORM
-  nombre: string = '';
-  email: string = '';
-  password: string = '';
-  confirmPassword: string = '';
+  showPassword = false;
+  showConfirm = false;
+  isLoading = false;
 
-  // CONTROL DE PASSWORD
-  showPassword: boolean = false;
-  showConfirm: boolean = false;
-  isLoading: boolean = false;
+  nombreError = '';
+  emailError = '';
+  passwordError = '';
+  confirmPasswordError = '';
 
-  // CONTROL DE ERRORES INDIVIDUALES
-  nombreError: string = '';
-  emailError: string = '';
-  passwordError: string = '';
-  confirmPasswordError: string = '';
-
-  // URL DEL BACKEND
-  API_URL = 'http://localhost:3000/api/auth';
-
-  // Google Client ID
-  GOOGLE_CLIENT_ID = '509438391464-s878u81t3tenpf3pad0hvhsp17i0hn7c.apps.googleusercontent.com';
-
-  constructor(
-    private http: HttpClient, 
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit() {
-    // Si viene desde pantalla2, pre-llenar el email
-    this.route.queryParams.subscribe(params => {
-      if (params['email']) {
-        this.email = params['email'];
-      }
+    this.loadGoogleScript();
+    this.route.queryParams.subscribe((params) => {
+      if (params['email']) this.email = params['email'];
     });
   }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  private loadGoogleScript() {
+    if ((window as any).google) return;
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
   }
 
-  toggleConfirm() {
-    this.showConfirm = !this.showConfirm;
+  togglePassword() { this.showPassword = !this.showPassword; }
+  toggleConfirm() { this.showConfirm = !this.showConfirm; }
+
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  /**
-   * Validar formato de email
-   */
-  isValidEmail(email: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
-
+  // ============================================================
+  // Registro con email y contraseña
+  // ============================================================
   register() {
-    // Limpiar errores previos
     this.nombreError = '';
     this.emailError = '';
     this.passwordError = '';
     this.confirmPasswordError = '';
 
-    // Validar NOMBRE
-    if (!this.nombre) {
-      this.nombreError = 'El nombre es requerido';
-    } else if (this.nombre.length < 3) {
-      this.nombreError = 'El nombre debe tener al menos 3 caracteres';
-    }
+    if (!this.nombre) this.nombreError = 'El nombre es requerido';
+    else if (this.nombre.length < 3) this.nombreError = 'El nombre debe tener al menos 3 caracteres';
 
-    // Validar EMAIL
-    if (!this.email) {
-      this.emailError = 'El correo electrónico es requerido';
-    } else if (!this.isValidEmail(this.email)) {
-      this.emailError = 'Ingresa un correo válido';
-    }
+    if (!this.email) this.emailError = 'El correo electrónico es requerido';
+    else if (!this.isValidEmail(this.email)) this.emailError = 'Ingresa un correo válido';
 
-    // Validar PASSWORD
-    if (!this.password) {
-      this.passwordError = 'La contraseña es requerida';
-    } else if (this.password.length < 6) {
-      this.passwordError = 'La contraseña debe tener al menos 6 caracteres';
-    }
+    if (!this.password) this.passwordError = 'La contraseña es requerida';
+    else if (this.password.length < 6) this.passwordError = 'La contraseña debe tener al menos 6 caracteres';
 
-    // Validar CONFIRM PASSWORD
-    if (!this.confirmPassword) {
-      this.confirmPasswordError = 'Confirma tu contraseña';
-    } else if (this.password !== this.confirmPassword) {
-      this.confirmPasswordError = 'Las contraseñas no coinciden';
-    }
+    if (!this.confirmPassword) this.confirmPasswordError = 'Confirma tu contraseña';
+    else if (this.password !== this.confirmPassword) this.confirmPasswordError = 'Las contraseñas no coinciden';
 
-    // Si hay error en ANY campo, detener aquí
-    if (this.nombreError || this.emailError || this.passwordError || this.confirmPasswordError) {
-      return;
-    }
+    if (this.nombreError || this.emailError || this.passwordError || this.confirmPasswordError) return;
 
     this.isLoading = true;
-    console.log('📝 Registrando usuario:', this.email);
 
-    this.http.post(`${this.API_URL}/register`, {
-      nombre: this.nombre,
-      email: this.email,
-      password: this.password
-    }).subscribe(
-      (res: any) => {
-        console.log('✅ Usuario registrado:', res);
-        
-        // Volver a pantalla2 con el email pre-llenado
-        this.router.navigate(['/pantalla2'], {
-          queryParams: { email: this.email }
-        });
+    this.auth.register(this.nombre, this.email, this.password).subscribe({
+      next: () => {
+        // Registro exitoso: ir a pantalla4 para configurar el primer dispositivo
+        this.router.navigate(['/pantalla4'], { replaceUrl: true });
       },
-      (err) => {
-        console.error('❌ Error:', err);
-        const mensaje = err.error?.mensaje || "Error al registrar";
-        
-        // Validar qué tipo de error es
-        if (mensaje.includes('existe') || mensaje.includes('duplicado')) {
+      error: (err) => {
+        const mensaje = err.error?.mensaje || 'Error al registrar';
+        if (mensaje.includes('existe') || mensaje.includes('registrado')) {
           this.emailError = 'Este correo ya está registrado';
         } else {
           this.emailError = mensaje;
         }
-      }
-    ).add(() => {
-      this.isLoading = false;
+        this.isLoading = false;
+      },
     });
   }
 
-  goBack() {
-    this.router.navigate(['/pantalla2']);
-  }
-
+  // ============================================================
+  // Registro / Login con Google
+  // ============================================================
   loginWithGoogle() {
-    console.log('🔵 Iniciando Google Sign-In...');
-    
     if (!(window as any).google) {
-      console.error('❌ Google SDK no cargado');
       alert('Google Sign-In no disponible');
       return;
     }
 
     this.isLoading = true;
 
-    // Usar Google Identity Services
     (window as any).google.accounts.id.initialize({
-      client_id: this.GOOGLE_CLIENT_ID,
+      client_id: environment.googleClientId,
       callback: (response: any) => this.handleGoogleResponse(response),
-      use_fedcm_for_prompt: false
+      use_fedcm_for_prompt: false,
     });
 
-    // Mostrar el selector de cuentas de Google
     (window as any).google.accounts.id.prompt();
   }
 
   private handleGoogleResponse(response: any) {
     if (!response.credential) {
-      console.error('❌ No se recibió token de Google');
       this.isLoading = false;
       alert('Error en Google Sign-In');
       return;
     }
 
-    const token = response.credential;
-    console.log('✅ Token recibido de Google');
-
-    // Enviar token al backend para validación
-    this.http.post(`${this.API_URL}/google-login`, {
-      token: token
-    }).subscribe(
-      (res: any) => {
-        console.log('✅ Autenticación Google exitosa:', res);
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('usuario', JSON.stringify(res.usuario));
-        
-        // Volver a pantalla2 después del login exitoso
-        this.router.navigate(['/dashboard']);
-      },
-      (err) => {
-        console.error('❌ Error en login Google:', err);
+    this.auth.loginWithGoogle(response.credential).subscribe({
+      next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
+      error: () => {
         alert('Error en autenticación con Google');
-      }
-    ).add(() => {
-      this.isLoading = false;
+        this.isLoading = false;
+      },
     });
   }
 
   loginWithFacebook() {
-    console.log('Facebook Login en desarrollo...');
-    alert('Facebook Login en desarrollo');
+    const FB = (window as any).FB;
+    if (!FB) {
+      alert('Facebook SDK no disponible');
+      return;
+    }
+    FB.login(
+      (fbResponse: any) => {
+        if (!fbResponse.authResponse) return;
+        this.isLoading = true;
+        const { accessToken, userID } = fbResponse.authResponse;
+        this.auth.loginWithFacebook(accessToken, userID).subscribe({
+          next: () => this.router.navigate(['/pantalla4'], { replaceUrl: true }),
+          error: () => {
+            alert('Error en autenticación con Facebook');
+            this.isLoading = false;
+          },
+        });
+      },
+      { scope: 'public_profile,email' }
+    );
+  }
+
+  goBack() {
+    this.router.navigate(['/pantalla2']);
   }
 }
+

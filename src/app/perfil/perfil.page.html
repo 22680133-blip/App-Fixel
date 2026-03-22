@@ -19,7 +19,7 @@
 <div class="user-card">
 
 <div class="avatar">
-I
+  {{usuario?.nombre?.charAt(0)?.toUpperCase() || 'U'}}
 </div>
 
 <h3>{{usuario?.nombre}}</h3>
@@ -106,7 +106,7 @@ I
 
     </div>
 
-    <button class="config-btn">
+    <button class="config-btn" (click)="configurarDispositivo(device)">
       Configurar →
     </button>
 
@@ -164,6 +164,8 @@ I
 <button>🔔 Notificaciones</button>
 
 <button>🔒 Privacidad</button>
+
+<button (click)="logout()">🚪 Cerrar sesión</button>
 
 </div>
 

@@ -2,17 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-import { 
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonButton,
-  IonIcon
-} from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
+import { AuthService } from '../services/auth.service';
+import { DeviceService, Dispositivo } from '../services/device.service';
 
 @Component({
   selector: 'app-perfil',
@@ -21,68 +13,49 @@ import {
   standalone: true,
   imports: [
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonButton,
-    IonIcon,
     CommonModule,
     FormsModule,
-    HttpClientModule
-  ]
+  ],
 })
 export class PerfilPage implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly router = inject(Router);
 
-  private http = inject(HttpClient);
-
-  API_URL = 'http://localhost:3000/api';
-
-  usuario:any = null;
-  dispositivos:any[] = [];
-
+  usuario = this.auth.getUsuario();
+  dispositivos: Dispositivo[] = [];
   totalDispositivos = 0;
   activos = 0;
 
-  constructor(private router: Router) {}
-
   ngOnInit() {
-
-    const data = localStorage.getItem('usuario');
-
-    if(data){
-      this.usuario = JSON.parse(data);
+    if (this.usuario) {
       this.cargarDispositivos();
     }
-
   }
 
-  cargarDispositivos(){
-
-    const token = localStorage.getItem('token');
-
-    this.http.get(`${this.API_URL}/devices`,{
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-    }).subscribe((res:any)=>{
-
-      this.dispositivos = res.devices || [];
-
-      this.totalDispositivos = this.dispositivos.length;
-
-      this.activos = this.dispositivos.filter(d=>d.status === 'activo').length;
-
+  cargarDispositivos() {
+    this.deviceService.getDispositivos().subscribe({
+      next: (res) => {
+        this.dispositivos = res.devices || [];
+        this.totalDispositivos = this.dispositivos.length;
+        this.activos = this.dispositivos.filter((d) => d.status === 'activo').length;
+      },
     });
+  }
 
+  configurarDispositivo(_device: Dispositivo) {
+    this.router.navigate(['/configuracion']);
+  }
+
+  agregarDispositivo() {
+    this.router.navigate(['/pantalla4']);
+  }
+
+  logout() {
+    this.auth.logout();
   }
 
   goBack() {
     this.router.navigate(['/dashboard']);
   }
-
-  agregarDispositivo(){
-    this.router.navigate(['/agregar-dispositivo']);
-  }
-
 }
