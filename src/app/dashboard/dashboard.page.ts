@@ -215,7 +215,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
     if (this.chart) {
       this.chart.data.labels = labels;
       this.chart.data.datasets[0].data = temps;
-      (this.chart.data.datasets[0] as any).label = `Temperatura (${this.unitSymbol})`;
+      this.chart.data.datasets[0].label = `Temperatura (${this.unitSymbol})`;
       this.chart.update();
       return;
     }

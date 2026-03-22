@@ -14,6 +14,10 @@ import { DeviceService, Dispositivo } from '../services/device.service';
   imports: [IonContent, FormsModule, CommonModule],
 })
 export class ConfiguracionPage implements OnInit, OnDestroy {
+  // Temperature limits for validation
+  private static readonly TEMP_ABS_MIN = -10;
+  private static readonly TEMP_ABS_MAX = 15;
+
   deviceName = 'Refrigerador Cocina';
   minTemp = 2;
   maxTemp = 8;
@@ -96,8 +100,8 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
       this.validationError = 'La temperatura mínima debe ser menor que la máxima.';
       return;
     }
-    if (this.minTemp < -10 || this.maxTemp > 15) {
-      this.validationError = 'Los valores deben estar entre -10°C y 15°C.';
+    if (this.minTemp < ConfiguracionPage.TEMP_ABS_MIN || this.maxTemp > ConfiguracionPage.TEMP_ABS_MAX) {
+      this.validationError = `Los valores deben estar entre ${ConfiguracionPage.TEMP_ABS_MIN}°C y ${ConfiguracionPage.TEMP_ABS_MAX}°C.`;
       return;
     }
 
