@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth.routes');
 const deviceRoutes = require('./routes/devices');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 
@@ -12,7 +13,10 @@ app.use(express.json());
 // Rutas de autenticación (sin cambios)
 app.use('/api/auth', authRoutes);
 
-// Rutas de dispositivos (NUEVO)
+// Rutas de perfil y contraseña (montadas en /api/auth para compartir prefijo)
+app.use('/api/auth', profileRoutes);
+
+// Rutas de dispositivos
 app.use('/api/devices', deviceRoutes);
 
 app.get('/', (req, res) => {

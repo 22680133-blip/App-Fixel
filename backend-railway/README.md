@@ -1,29 +1,42 @@
 # Archivos para Railway (backend-monitoreo)
 
-Estos archivos agregan el endpoint `/api/devices` al backend-monitoreo
-desplegado en Railway. **No tocan la autenticación.**
+Estos archivos agregan los endpoints `/api/devices`, `/api/auth/profile` y
+`/api/auth/password` al backend-monitoreo desplegado en Railway.
+**No tocan la autenticación existente (login/register).**
 
 ## Archivos a copiar
 
 Copia estos archivos a tu repositorio `backend-monitoreo`:
 
-| Archivo de aquí                        | Copiar a (en backend-monitoreo)          | Acción        |
-| -------------------------------------- | ---------------------------------------- | ------------- |
-| `src/app.js`                           | `src/app.js`                             | **Reemplazar** |
-| `src/middleware/auth.js`               | `src/middleware/auth.js`                 | **Crear**     |
-| `src/controllers/device.controller.js` | `src/controllers/device.controller.js`   | **Crear**     |
-| `src/routes/devices.js`               | `src/routes/devices.js`                  | **Reemplazar** |
+| Archivo de aquí                             | Copiar a (en backend-monitoreo)               | Acción        |
+| ------------------------------------------- | ---------------------------------------------- | ------------- |
+| `src/app.js`                                | `src/app.js`                                   | **Reemplazar** |
+| `src/middleware/auth.js`                     | `src/middleware/auth.js`                        | **Crear**     |
+| `src/controllers/device.controller.js`      | `src/controllers/device.controller.js`          | **Crear**     |
+| `src/controllers/profile.controller.js`     | `src/controllers/profile.controller.js`         | **Crear**     |
+| `src/routes/devices.js`                     | `src/routes/devices.js`                         | **Reemplazar** |
+| `src/routes/profile.js`                     | `src/routes/profile.js`                         | **Crear**     |
+
+## SQL — Agregar columnas para perfil
+
+Ejecuta este SQL en tu base de datos de Railway **antes** de desplegar:
+
+```sql
+ALTER TABLE users ADD COLUMN IF NOT EXISTS telefono VARCHAR DEFAULT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS ubicacion VARCHAR DEFAULT NULL;
+```
 
 ## Pasos
 
-1. Copia los 4 archivos a tu repo `backend-monitoreo`
-2. Haz commit y push:
+1. Ejecuta el SQL de arriba en tu PostgreSQL de Railway
+2. Copia los 6 archivos a tu repo `backend-monitoreo`
+3. Haz commit y push:
    ```bash
    git add .
-   git commit -m "feat: agregar endpoint de dispositivos"
+   git commit -m "feat: agregar endpoints de dispositivos y perfil"
    git push
    ```
-3. Railway redespliega automáticamente
+4. Railway redespliega automáticamente
 
 ## Qué hace cada archivo
 
@@ -37,10 +50,16 @@ Copia estos archivos a tu repositorio `backend-monitoreo`:
   - `PUT /api/devices/:id` → Actualiza nombre, ubicación, límites
   - `DELETE /api/devices/:id` → Elimina un dispositivo
 
-- **`src/routes/devices.js`** — Define las rutas y aplica el middleware auth.
+- **`src/controllers/profile.controller.js`** — Gestión de perfil:
+  - `PUT /api/auth/profile` → Actualiza nombre, teléfono, ubicación, picture
+  - `PUT /api/auth/password` → Cambia contraseña (requiere contraseña actual)
+
+- **`src/routes/devices.js`** — Define las rutas de dispositivos y aplica el middleware auth.
+
+- **`src/routes/profile.js`** — Define las rutas de perfil y aplica el middleware auth.
 
 - **`src/app.js`** — Versión actualizada que monta las rutas de dispositivos
-  junto con las de autenticación existentes.
+  y perfil junto con las de autenticación existentes.
 
 ## Columnas de la tabla devices
 
@@ -57,7 +76,16 @@ device_code   VARCHAR UNIQUE
 device_id     VARCHAR
 ```
 
+## Columnas de la tabla users (nuevas)
+
+```
+telefono      VARCHAR DEFAULT NULL
+ubicacion     VARCHAR DEFAULT NULL
+```
+
 ## Mapeo DB → JSON (respuesta al frontend)
+
+### Dispositivos
 
 | Columna DB     | Campo JSON  |
 | -------------- | ----------- |
@@ -69,3 +97,14 @@ device_id     VARCHAR
 | `limite_max`   | `limiteMax` |
 | `status`       | `status`    |
 | `created_at`   | `createdAt` |
+
+### Usuario (perfil)
+
+| Columna DB     | Campo JSON   |
+| -------------- | ------------ |
+| `id`           | `id`         |
+| `nombre`       | `nombre`     |
+| `email`        | `email`      |
+| `picture`      | `picture`    |
+| `telefono`     | `telefono`   |
+| `ubicacion`    | `ubicacion`  |

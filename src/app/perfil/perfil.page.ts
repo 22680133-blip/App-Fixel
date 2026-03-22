@@ -53,7 +53,23 @@ export class PerfilPage implements OnInit {
       this.editTelefono = this.usuario.telefono || '';
       this.editUbicacion = this.usuario.ubicacion || '';
       this.cargarDispositivos();
+      this.cargarPerfilFresco();
     }
+  }
+
+  /** Carga datos frescos del usuario desde el backend (para obtener telefono/ubicacion reales) */
+  private cargarPerfilFresco() {
+    this.auth.getMe().subscribe({
+      next: (res) => {
+        this.usuario = res.usuario;
+        this.editNombre = this.usuario.nombre || '';
+        this.editTelefono = this.usuario.telefono || '';
+        this.editUbicacion = this.usuario.ubicacion || '';
+      },
+      error: () => {
+        // Si falla, mantener los datos locales
+      },
+    });
   }
 
   cargarDispositivos() {

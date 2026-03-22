@@ -151,7 +151,7 @@ Fahrenheit (°F)
     [(ngModel)]="currentPassword"
     placeholder="Ingresa tu contraseña actual"
     class="password-input">
-  <button type="button" class="toggle-pw" (click)="showCurrentPassword = !showCurrentPassword">
+  <button type="button" class="toggle-pw" (click)="showCurrentPassword = !showCurrentPassword" aria-label="Mostrar contraseña actual">
     {{showCurrentPassword ? '🙈' : '👁️'}}
   </button>
 </div>
@@ -163,7 +163,7 @@ Fahrenheit (°F)
     [(ngModel)]="newPassword"
     placeholder="Mínimo 6 caracteres"
     class="password-input">
-  <button type="button" class="toggle-pw" (click)="showNewPassword = !showNewPassword">
+  <button type="button" class="toggle-pw" (click)="showNewPassword = !showNewPassword" aria-label="Mostrar nueva contraseña">
     {{showNewPassword ? '🙈' : '👁️'}}
   </button>
 </div>

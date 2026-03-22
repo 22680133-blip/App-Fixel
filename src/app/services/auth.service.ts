@@ -107,6 +107,18 @@ export class AuthService {
       );
   }
 
+  /** Obtener datos frescos del usuario desde el backend */
+  getMe(): Observable<{ usuario: Usuario }> {
+    const headers = { Authorization: `Bearer ${this.getToken()}` };
+    return this.http
+      .get<{ usuario: Usuario }>(`${this.API}/me`, { headers })
+      .pipe(
+        tap((res) => {
+          localStorage.setItem('usuario', JSON.stringify(res.usuario));
+        }),
+      );
+  }
+
   /** Cambiar contraseña */
   changePassword(currentPassword: string, newPassword: string): Observable<{ mensaje: string }> {
     const headers = { Authorization: `Bearer ${this.getToken()}` };

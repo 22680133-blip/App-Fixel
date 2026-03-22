@@ -170,6 +170,20 @@ router.post('/facebook-login', async (req, res) => {
 });
 
 // ============================================================
+// GET /api/auth/me — Obtener datos actuales del usuario
+// ============================================================
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.userId);
+    if (!user) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    return res.json({ usuario: formatUser(user) });
+  } catch (error) {
+    console.error('❌ Error get me:', error.message);
+    return res.status(500).json({ mensaje: 'Error al obtener perfil' });
+  }
+});
+
+// ============================================================
 // PUT /api/auth/profile — Actualizar perfil del usuario
 // ============================================================
 router.put('/profile', auth, async (req, res) => {
