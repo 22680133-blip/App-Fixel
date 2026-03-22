@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { connectDB } = require('./src/config/db');
+const { connectDB, sequelize } = require('./src/config/db');
 const mqttClient = require('./src/mqtt/mqtt.client');
 
 const authRoutes = require('./src/routes/auth.routes');
@@ -71,10 +71,10 @@ app.use('/api/readings', apiLimiter, readingRoutes);
 app.get('/', async (req, res) => {
   let dbStatus = 'unknown';
   try {
-    const { sequelize } = require('./src/config/db');
     await sequelize.authenticate();
     dbStatus = 'connected';
-  } catch {
+  } catch (err) {
+    console.error('❌ Health check — DB disconnected:', err.message);
     dbStatus = 'disconnected';
   }
   res.json({
