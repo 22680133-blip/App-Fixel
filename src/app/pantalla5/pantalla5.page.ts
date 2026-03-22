@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { IonContent } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FoodService } from '../services/food.service';
+import { DeviceService } from '../services/device.service';
 
 interface Food {
   id: number;
@@ -17,14 +18,17 @@ interface Food {
   templateUrl: './pantalla5.page.html',
   styleUrls: ['./pantalla5.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule]
+  imports: [IonContent, CommonModule],
 })
 export class Pantalla5Page implements OnInit {
   selectedFoods: Food[] = [];
-  tempMin: number = 0;
-  tempMax: number = 8;
+  tempMin = 0;
+  tempMax = 8;
+  isLoading = false;
 
-  constructor(private foodService: FoodService, private router: Router) { }
+  private readonly foodService = inject(FoodService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly router = inject(Router);
 
   ngOnInit() {
     this.selectedFoods = this.foodService.getSelectedFoods();
@@ -38,26 +42,57 @@ export class Pantalla5Page implements OnInit {
       return;
     }
 
-    const temps = this.selectedFoods.map(food => {
+    const temps = this.selectedFoods.map((food) => {
       const range = food.temp.split(' - ');
-      return {
-        min: parseInt(range[0]),
-        max: parseInt(range[1])
-      };
+      return { min: parseInt(range[0]), max: parseInt(range[1]) };
     });
 
-    // Temperatura mínima = la más baja de todas
-    // Temperatura máxima = la más alta de todas
-    this.tempMin = Math.min(...temps.map(t => t.min));
-    this.tempMax = Math.max(...temps.map(t => t.max));
+    this.tempMin = Math.min(...temps.map((t) => t.min));
+    this.tempMax = Math.max(...temps.map((t) => t.max));
   }
 
+  // ============================================================
+  // Guardar configuración de alimentos y navegar al dashboard
+  // ============================================================
   continuar() {
-    this.router.navigate(['/dashboard']);
+    this.isLoading = true;
+    const nombres = this.selectedFoods.map((f) => f.name);
+
+    this.deviceService.getDispositivos().subscribe({
+      next: (res) => {
+        if (res.devices && res.devices.length > 0) {
+          // Actualizar el primer dispositivo con la config de alimentos
+          const deviceId = res.devices[0]._id;
+          this.deviceService
+            .guardarConfigAlimentos(deviceId, nombres, this.tempMin, this.tempMax)
+            .subscribe({
+              next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+              error: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+            });
+        } else {
+          // No tiene dispositivo aún: crear uno con la config
+          this.deviceService
+            .crearDispositivo({
+              nombre: 'Mi Refrigerador',
+              alimentos: nombres,
+              tempMin: this.tempMin,
+              tempMax: this.tempMax,
+            })
+            .subscribe({
+              next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+              error: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+            });
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.router.navigate(['/dashboard'], { replaceUrl: true });
+      },
+    });
   }
 
   goBack() {
     this.router.navigate(['/pantalla4']);
   }
-
 }
+

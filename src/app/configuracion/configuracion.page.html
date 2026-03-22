@@ -106,7 +106,7 @@ max="15"
 
 <button
 (click)="unit='C'"
-[class.active]="unit=='C'">
+[class.active]="unit==='C'">
 
 Celsius (°C)
 
@@ -115,7 +115,7 @@ Celsius (°C)
 
 <button
 (click)="unit='F'"
-[class.active]="unit=='F'">
+[class.active]="unit==='F'">
 
 Fahrenheit (°F)
 
@@ -129,17 +129,15 @@ Fahrenheit (°F)
 
 <!-- BOTON -->
 
-<button class="save-btn" (click)="guardar()">
-
-Guardar Configuración
-
+<button class="save-btn" (click)="guardar()" [disabled]="isLoading">
+  {{ isLoading ? 'Guardando...' : 'Guardar Configuración' }}
 </button>
 
+<p class="success-msg" *ngIf="guardado">✅ Configuración guardada correctamente.</p>
+<p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
 
 <p class="note">
-
-Los cambios se aplicarán inmediatamente al monitoreo de temperatura.
-
+  Los cambios se aplicarán inmediatamente al monitoreo de temperatura.
 </p>
 
 </div>
