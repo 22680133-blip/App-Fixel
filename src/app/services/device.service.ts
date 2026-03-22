@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 export interface Dispositivo {
-  _id: string;
+  id: string;
   nombre: string;
   status: string;
   tempMin: number;

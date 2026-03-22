@@ -9,17 +9,24 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /** Genera un JWT para el usuario dado */
 const generateToken = (user) =>
-  jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+  jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 
 /** Formatea la respuesta de usuario para el frontend */
 const formatUser = (user) => ({
-  id: user._id,
+  id: user.id,
   nombre: user.nombre,
   email: user.email,
   picture: user.picture,
 });
+
+/** Verifica si el error es de conexión a la base de datos */
+const isConnectionError = (error) =>
+  error.name === 'SequelizeConnectionError' ||
+  error.name === 'SequelizeConnectionRefusedError' ||
+  error.name === 'SequelizeHostNotFoundError' ||
+  error.name === 'SequelizeConnectionTimedOutError';
 
 // ============================================================
 // POST /api/auth/register
@@ -32,7 +39,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ mensaje: 'Nombre, email y contraseña son requeridos' });
     }
 
-    const existe = await User.findOne({ email: email.toLowerCase() });
+    const existe = await User.findOne({ where: { email: email.toLowerCase() } });
     if (existe) {
       return res.status(400).json({ mensaje: 'Este correo ya está registrado' });
     }
@@ -43,7 +50,7 @@ router.post('/register', async (req, res) => {
     return res.status(201).json({ token, usuario: formatUser(user) });
   } catch (error) {
     console.error('❌ Error register:', error.message, error.stack);
-    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+    if (isConnectionError(error)) {
       return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
     }
     return res.status(500).json({ mensaje: 'Error interno del servidor' });
@@ -61,7 +68,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ mensaje: 'Email y contraseña son requeridos' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
       return res.status(401).json({ mensaje: 'Correo no encontrado' });
     }
@@ -75,7 +82,7 @@ router.post('/login', async (req, res) => {
     return res.json({ token, usuario: formatUser(user) });
   } catch (error) {
     console.error('❌ Error login:', error.message, error.stack);
-    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+    if (isConnectionError(error)) {
       return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
     }
     return res.status(500).json({ mensaje: 'Error interno del servidor' });
@@ -99,7 +106,7 @@ router.post('/google-login', async (req, res) => {
 
     const { sub, email, name, picture } = ticket.getPayload();
 
-    let user = await User.findOne({ email: email.toLowerCase() });
+    let user = await User.findOne({ where: { email: email.toLowerCase() } });
     if (!user) {
       user = await User.create({ nombre: name || email.split('@')[0], email, picture, googleId: sub });
     } else if (!user.googleId) {
@@ -108,11 +115,11 @@ router.post('/google-login', async (req, res) => {
       await user.save();
     }
 
-    const jwt = generateToken(user);
-    return res.json({ token: jwt, usuario: formatUser(user) });
+    const jwtToken = generateToken(user);
+    return res.json({ token: jwtToken, usuario: formatUser(user) });
   } catch (error) {
     console.error('❌ Error google-login:', error.message, error.stack);
-    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerSelectionError') {
+    if (isConnectionError(error)) {
       return res.status(503).json({ mensaje: 'Error de conexión con la base de datos. Intenta de nuevo.' });
     }
     return res.status(401).json({ mensaje: 'Token de Google inválido o expirado' });
@@ -138,7 +145,7 @@ router.post('/facebook-login', async (req, res) => {
       return res.status(400).json({ mensaje: 'El correo no está disponible en tu cuenta de Facebook' });
     }
 
-    let user = await User.findOne({ email: fb.email.toLowerCase() });
+    let user = await User.findOne({ where: { email: fb.email.toLowerCase() } });
     if (!user) {
       user = await User.create({
         nombre: fb.name || fb.email.split('@')[0],
@@ -151,8 +158,8 @@ router.post('/facebook-login', async (req, res) => {
       await user.save();
     }
 
-    const jwt = generateToken(user);
-    return res.json({ token: jwt, usuario: formatUser(user) });
+    const jwtToken = generateToken(user);
+    return res.json({ token: jwtToken, usuario: formatUser(user) });
   } catch (error) {
     console.error('❌ Error facebook-login:', error.message);
     return res.status(401).json({ mensaje: 'Error al validar token de Facebook' });

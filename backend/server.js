@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const connectDB = require('./src/config/db');
+const { connectDB } = require('./src/config/db');
 const mqttClient = require('./src/mqtt/mqtt.client');
 
 const authRoutes = require('./src/routes/auth.routes');

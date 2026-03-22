@@ -7,7 +7,7 @@
  * recibir datos de temperatura del sensor ESP32.
  *
  * Flujo de datos:
- *   ESP32 → MQTT Broker (TLS) → Este servidor → MongoDB
+ *   ESP32 → MQTT Broker (TLS) → Este servidor → PostgreSQL
  *
  * Tópico que publica el ESP32:
  *   fixel/{mqttClientId}/data
@@ -76,15 +76,15 @@ const handleMessage = async (topic, message) => {
     }
 
     // Buscar el dispositivo por su mqttClientId
-    const device = await Device.findOne({ mqttClientId });
+    const device = await Device.findOne({ where: { mqttClientId } });
     if (!device) {
       console.warn(`⚠️ Dispositivo no registrado: ${mqttClientId}`);
       return;
     }
 
-    // Guardar la lectura en MongoDB
+    // Guardar la lectura en PostgreSQL
     await Reading.create({
-      deviceId: device._id,
+      deviceId: device.id,
       temperatura,
       humedad: humedad ?? null,
       compresor: compresor ?? true,

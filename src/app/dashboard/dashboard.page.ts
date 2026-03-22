@@ -54,7 +54,7 @@ export class DashboardPage implements OnInit {
         this.maxTemp = this.dispositivo.tempMax;
 
         // Cargar la última lectura del sensor
-        this.cargarUltimaLectura(this.dispositivo._id);
+        this.cargarUltimaLectura(this.dispositivo.id);
       },
     });
   }

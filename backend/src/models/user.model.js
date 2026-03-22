@@ -1,38 +1,59 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const userSchema = new mongoose.Schema(
+const User = sequelize.define(
+  'User',
   {
-    nombre: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, default: null },
-    googleId: { type: String, default: null },
-    facebookId: { type: String, default: null },
-    picture: { type: String, default: null },
+    nombre: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      set(value) {
+        this.setDataValue('nombre', value.trim());
+      },
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      set(value) {
+        this.setDataValue('email', value.toLowerCase().trim());
+      },
+    },
+    password: { type: DataTypes.STRING, defaultValue: null },
+    googleId: { type: DataTypes.STRING, defaultValue: null },
+    facebookId: { type: DataTypes.STRING, defaultValue: null },
+    picture: { type: DataTypes.TEXT, defaultValue: null },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    hooks: {
+      // Hash de contraseña antes de guardar
+      beforeCreate: async (user) => {
+        if (user.password) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed('password') && user.password) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      },
+    },
+  }
 );
 
-// Hash de contraseña antes de guardar
-userSchema.pre('save', async function (next) {
-  if (this.password && this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
-  next();
-});
-
 // Comparar contraseña en texto plano contra el hash
-userSchema.methods.comparePassword = async function (password) {
+User.prototype.comparePassword = async function (password) {
   if (!this.password) return false;
   return bcrypt.compare(password, this.password);
 };
 
 // Nunca exponer contraseña en respuestas JSON
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  delete obj.__v;
-  return obj;
+User.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  delete values.password;
+  return values;
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;
