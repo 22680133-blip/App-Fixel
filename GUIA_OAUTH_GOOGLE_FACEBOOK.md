@@ -17,11 +17,17 @@
 3. Habilitar **Google+ API**
 4. Ir a **Credenciales** → **Crear credenciales** → **OAuth 2.0 Client ID**
 5. Seleccionar **Aplicación web**
-6. Agregar URIs autorizados:
-   - `http://localhost:4200`
-   - `http://TU_IP_LOCAL:4200`
-   - `https://tudominio.com`
+6. En **Orígenes autorizados de JavaScript** agregar:
+   - `http://localhost:8100` ← Ionic serve (desarrollo)
+   - `http://localhost:4200` ← Angular serve (ng serve)
+   - `http://localhost` ← Capacitor (app móvil)
+   - `https://tudominio.com` ← Producción
 7. Copiar el **Client ID**
+
+> ⚠️ **IMPORTANTE**: Si ves el error `Error 400: origin_mismatch`, significa que el
+> origen desde donde ejecutas la app NO está registrado en Google Cloud Console.
+> Abre la consola del navegador (F12) para ver el origen actual y agrégalo en
+> Credenciales → OAuth 2.0 → Orígenes autorizados de JavaScript.
 
 ### 2️⃣ Actualizar el componente
 
@@ -196,6 +202,43 @@ const userSchema = new Schema({
 - Facebook Developers: https://developers.facebook.com
 - Google API Docs: https://developers.google.com/identity/gsi/web
 - Facebook SDK: https://developers.facebook.com/docs/facebook-login
+
+---
+
+## 🆘 Solución de Problemas
+
+### Error 400: origin_mismatch (Acceso bloqueado)
+
+Este error significa que el origen (URL) desde donde se ejecuta la app no está
+registrado en Google Cloud Console.
+
+**Pasos para solucionarlo:**
+
+1. Abre la consola del navegador (F12) y busca el mensaje:
+   `[Google Sign-In] Origen actual: "http://localhost:8100"`
+2. Copia ese origen exacto
+3. Ve a [Google Cloud Console](https://console.cloud.google.com) → **Credenciales** → Tu **OAuth 2.0 Client ID**
+4. En **Orígenes autorizados de JavaScript**, agrega el origen que copiaste
+5. Guarda y espera ~5 minutos para que se propague el cambio
+
+**Orígenes comunes que debes registrar:**
+
+| Origen | Cuándo |
+|--------|--------|
+| `http://localhost:8100` | `ionic serve` (desarrollo) |
+| `http://localhost:4200` | `ng serve` (desarrollo) |
+| `http://localhost` | Capacitor webview (app móvil) |
+| `https://tudominio.com` | Producción |
+
+### Google no aparece
+- ✓ Verifica que Google Client ID es correcto
+- ✓ Verifica que la URL está en "Authorized origins" en Google Cloud
+- ✓ Abre consola (F12) y busca errores
+
+### Token inválido
+- ✓ Verifica que Google Client ID en backend y frontend coinciden
+- ✓ Verifica JWT_SECRET en backend
+- ✓ Verifica que el JWT no expiró
 
 ---
 
