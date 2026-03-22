@@ -18,9 +18,18 @@
 
 <div class="user-card">
 
-<div class="avatar">
-  {{usuario?.nombre?.charAt(0)?.toUpperCase() || 'U'}}
+<div class="avatar-wrapper" (click)="abrirSelectorFoto()">
+  <div class="avatar" *ngIf="!usuario?.picture">
+    {{usuario?.nombre?.charAt(0)?.toUpperCase() || 'U'}}
+  </div>
+  <img *ngIf="usuario?.picture" [src]="usuario?.picture" class="avatar-img" alt="Avatar">
+  <div class="avatar-overlay">
+    <span>📷</span>
+  </div>
 </div>
+<input type="file" #fileInput accept="image/*" (change)="onFotoSeleccionada($event)" style="display:none;">
+<button *ngIf="usuario?.picture" class="remove-photo-btn" (click)="eliminarFoto()">✕ Quitar foto</button>
+<p class="uploading-msg" *ngIf="uploadingPhoto">⏳ Subiendo foto...</p>
 
 <h3>{{usuario?.nombre}}</h3>
 
@@ -80,6 +89,7 @@
 
 </div>
 
+<p class="profile-error" *ngIf="profileError && !editMode">{{profileError}}</p>
 <p class="profile-success" *ngIf="profileMsg">✅ {{profileMsg}}</p>
 
 </div>
@@ -196,11 +206,7 @@
 
 <h3>⚙️ Configuración</h3>
 
-<button>🔑 Cambiar contraseña</button>
-
-<button>🔔 Notificaciones</button>
-
-<button>🔒 Privacidad</button>
+<button (click)="irCambiarPassword()">🔑 Cambiar contraseña</button>
 
 <button (click)="logout()">🚪 Cerrar sesión</button>
 

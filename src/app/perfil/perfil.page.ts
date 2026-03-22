@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,6 +22,8 @@ export class PerfilPage implements OnInit {
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
 
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   usuario: Usuario | null = this.auth.getUsuario();
   dispositivos: Dispositivo[] = [];
   totalDispositivos = 0;
@@ -35,6 +37,7 @@ export class PerfilPage implements OnInit {
   savingProfile = false;
   profileMsg = '';
   profileError = '';
+  uploadingPhoto = false;
 
   // Modal "Agregar dispositivo"
   mostrarModal = false;
@@ -125,7 +128,9 @@ export class PerfilPage implements OnInit {
       },
       error: (err) => {
         this.savingProfile = false;
-        this.profileError = err.error?.mensaje || 'Error al actualizar perfil.';
+        this.profileError =
+          err.error?.mensaje || err.error?.error || err.error?.message ||
+          'Error al actualizar perfil. Verifica tu conexión.';
       },
     });
   }
@@ -210,6 +215,87 @@ export class PerfilPage implements OnInit {
 
   cerrarDeviceIdModal() {
     this.mostrarDeviceIdModal = false;
+  }
+
+  // ============================================================
+  // Avatar dinámico
+  // ============================================================
+  abrirSelectorFoto() {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFotoSeleccionada(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+      this.profileError = 'Solo se permiten archivos de imagen.';
+      return;
+    }
+
+    // Limit to 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      this.profileError = 'La imagen no debe superar 5 MB.';
+      return;
+    }
+
+    this.uploadingPhoto = true;
+    this.profileError = '';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      this.auth.updateProfile({ picture: base64 }).subscribe({
+        next: (res) => {
+          this.uploadingPhoto = false;
+          this.usuario = res.usuario;
+          this.profileMsg = 'Foto actualizada correctamente.';
+          setTimeout(() => (this.profileMsg = ''), 3000);
+        },
+        error: (err) => {
+          this.uploadingPhoto = false;
+          this.profileError =
+            err.error?.mensaje || err.error?.error || err.error?.message ||
+            'Error al subir la foto.';
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input so the same file can be selected again
+    input.value = '';
+  }
+
+  eliminarFoto() {
+    this.uploadingPhoto = true;
+    this.profileError = '';
+
+    this.auth.updateProfile({ picture: '' }).subscribe({
+      next: (res) => {
+        this.uploadingPhoto = false;
+        this.usuario = res.usuario;
+        // Clear picture locally if backend returns empty string
+        if (this.usuario && !this.usuario.picture) {
+          this.usuario.picture = undefined;
+        }
+        this.profileMsg = 'Foto eliminada.';
+        setTimeout(() => (this.profileMsg = ''), 3000);
+      },
+      error: (err) => {
+        this.uploadingPhoto = false;
+        this.profileError =
+          err.error?.mensaje || err.error?.error || err.error?.message ||
+          'Error al eliminar la foto.';
+      },
+    });
+  }
+
+  // ============================================================
+  // Navegación
+  // ============================================================
+  irCambiarPassword() {
+    this.router.navigate(['/configuracion']);
   }
 
   logout() {

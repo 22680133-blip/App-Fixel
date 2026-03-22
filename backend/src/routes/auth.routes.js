@@ -195,7 +195,7 @@ router.put('/profile', auth, async (req, res) => {
     if (nombre !== undefined) user.nombre = nombre;
     if (telefono !== undefined) user.telefono = telefono;
     if (ubicacion !== undefined) user.ubicacion = ubicacion;
-    if (picture !== undefined) user.picture = picture;
+    if (picture !== undefined) user.picture = picture || null;
 
     await user.save();
     return res.json({ usuario: formatUser(user) });
