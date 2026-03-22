@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
 export interface Dispositivo {
-  id: string;
+  id: number;
   /** Identificador único legible (ej: "FRIDGE-A1B2"), generado por el backend */
   deviceId: string;
   nombre: string;
@@ -91,7 +91,7 @@ export class DeviceService {
   }
 
   /** Obtener un dispositivo por ID */
-  getDispositivo(id: string): Observable<{ device: Dispositivo }> {
+  getDispositivo(id: number): Observable<{ device: Dispositivo }> {
     return this.http.get<{ device: Dispositivo }>(`${this.API}/devices/${id}`, {
       headers: this.headers,
     });
@@ -106,7 +106,7 @@ export class DeviceService {
 
   /** Actualizar configuración de un dispositivo */
   actualizarDispositivo(
-    id: string,
+    id: number,
     data: Partial<Dispositivo>
   ): Observable<{ device: Dispositivo }> {
     return this.http.put<{ device: Dispositivo }>(`${this.API}/devices/${id}`, data, {
@@ -116,7 +116,7 @@ export class DeviceService {
 
   /** Guardar configuración de temperatura y alertas (desde pantalla Configuración) */
   guardarConfiguracion(
-    id: string,
+    id: number,
     config: ConfigDispositivo
   ): Observable<{ device: Dispositivo }> {
     return this.actualizarDispositivo(id, config);
@@ -124,7 +124,7 @@ export class DeviceService {
 
   /** Guardar alimentos seleccionados y rango de temperatura (desde pantalla4/5) */
   guardarConfigAlimentos(
-    id: string,
+    id: number,
     alimentos: string[],
     tempMin: number,
     tempMax: number
@@ -133,7 +133,7 @@ export class DeviceService {
   }
 
   /** Última lectura de temperatura del ESP32 */
-  getUltimaLectura(deviceId: string): Observable<{ reading: Lectura | null }> {
+  getUltimaLectura(deviceId: number): Observable<{ reading: Lectura | null }> {
     return this.http.get<{ reading: Lectura | null }>(
       `${this.API}/readings/latest/${deviceId}`,
       { headers: this.headers }
@@ -141,7 +141,7 @@ export class DeviceService {
   }
 
   /** Historial de lecturas de las últimas 24 horas */
-  getHistorial(deviceId: string): Observable<{ readings: Lectura[] }> {
+  getHistorial(deviceId: number): Observable<{ readings: Lectura[] }> {
     return this.http.get<{ readings: Lectura[] }>(
       `${this.API}/readings/history/${deviceId}`,
       { headers: this.headers }

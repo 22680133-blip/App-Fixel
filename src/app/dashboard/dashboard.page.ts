@@ -74,7 +74,7 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  private cargarUltimaLectura(deviceId: string) {
+  private cargarUltimaLectura(deviceId: number) {
     this.deviceService.getUltimaLectura(deviceId).subscribe({
       next: (res) => {
         if (!res.reading) return;
@@ -85,6 +85,14 @@ export class DashboardPage implements OnInit {
         this.compresor = lectura.compresor ? 'Funcionando' : 'Detenido';
         const fecha = new Date(lectura.timestamp);
         this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+
+        // Update device status based on reading data
+        if (lectura.energia === 'Falla') {
+          this.deviceStatus = 'alerta';
+        } else {
+          // Non-failure reading means the device is active
+          this.deviceStatus = 'activo';
+        }
 
         // Evaluar si la temperatura está fuera de rango
         this.evaluarAlerta();
