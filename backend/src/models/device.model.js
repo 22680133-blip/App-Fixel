@@ -11,12 +11,13 @@ const Device = sequelize.define(
       references: { model: 'users', key: 'id' },
     },
 
-    // Identificador único legible del dispositivo (ej: "FRIDGE-001", generado por el backend)
-    // Este ID se configura manualmente en el ESP32 para vincular app ↔ backend ↔ sensor
+    // Código legible del dispositivo (ej: "FRIDGE-A1B2"), generado por el backend.
+    // Se almacena en la columna 'device_code' de la tabla devices.
     deviceId: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
+      field: 'device_code',
     },
 
     // Nombre descriptivo (el usuario puede editarlo en Configuración)
@@ -34,40 +35,24 @@ const Device = sequelize.define(
       defaultValue: '',
     },
 
-    // Configuración de temperatura (guardada desde pantalla5 y Configuración)
-    tempMin: { type: DataTypes.FLOAT, defaultValue: 2 },
-    tempMax: { type: DataTypes.FLOAT, defaultValue: 8 },
-    unidad: {
-      type: DataTypes.ENUM('C', 'F'),
-      defaultValue: 'C',
-    },
-    alertas: { type: DataTypes.BOOLEAN, defaultValue: true },
+    // Límites de temperatura configurados por el usuario
+    limiteMin: { type: DataTypes.FLOAT, defaultValue: 2 },
+    limiteMax: { type: DataTypes.FLOAT, defaultValue: 8 },
 
-    // Categorías de alimentos seleccionadas en pantalla4
-    alimentos: {
-      type: DataTypes.JSONB,
-      defaultValue: [],
-    },
-
-    // Estado actual del dispositivo (actualizado por el servidor MQTT)
+    // Estado actual del dispositivo
     status: {
-      type: DataTypes.ENUM('activo', 'desconectado', 'alerta'),
+      type: DataTypes.STRING,
       defaultValue: 'desconectado',
     },
 
-    // ============================================================
-    // Variables para la integración ESP32 / MQTT-TLS
-    // Estas variables se rellenan cuando el sensor físico esté listo
-    // ============================================================
-
-    // ID único del ESP32 (se configura en el firmware del ESP32)
-    mqttClientId: { type: DataTypes.STRING, defaultValue: null },
-
-    // Tópico MQTT donde el ESP32 publica sus datos
-    // Formato esperado: fixel/{mqttClientId}/data
-    mqttTopic: { type: DataTypes.STRING, defaultValue: null },
+    // Identificador externo del dispositivo (columna device_id)
+    externalDeviceId: {
+      type: DataTypes.STRING,
+      field: 'device_id',
+      defaultValue: null,
+    },
   },
-  { tableName: 'devices', timestamps: true, underscored: true }
+  { tableName: 'devices', timestamps: true, underscored: true, updatedAt: false }
 );
 
 module.exports = Device;

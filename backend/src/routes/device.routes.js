@@ -58,18 +58,15 @@ router.get('/:id', async (req, res) => {
 // ============================================================
 router.post('/', async (req, res) => {
   try {
-    const { nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
+    const { nombre, ubicacion, limiteMin, limiteMax } = req.body;
     const deviceId = await generateDeviceId();
     const device = await Device.create({
       userId: req.userId,
       deviceId,
       nombre: nombre || 'Mi Refrigerador',
       ubicacion: ubicacion || '',
-      tempMin: tempMin ?? 2,
-      tempMax: tempMax ?? 8,
-      unidad: unidad || 'C',
-      alertas: alertas ?? true,
-      alimentos: alimentos || [],
+      limiteMin: limiteMin ?? 2,
+      limiteMax: limiteMax ?? 8,
     });
     return res.status(201).json({ device });
   } catch (error) {
@@ -83,13 +80,13 @@ router.post('/', async (req, res) => {
 // ============================================================
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
+    const { nombre, ubicacion, limiteMin, limiteMax } = req.body;
 
     const device = await Device.findOne({ where: { id: req.params.id, userId: req.userId } });
 
     if (!device) return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
 
-    await device.update({ nombre, ubicacion, tempMin, tempMax, unidad, alertas, alimentos });
+    await device.update({ nombre, ubicacion, limiteMin, limiteMax });
     return res.json({ device });
   } catch (error) {
     console.error('❌ Error update device:', error.message);

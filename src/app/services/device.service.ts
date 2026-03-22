@@ -12,15 +12,8 @@ export interface Dispositivo {
   /** Ubicación física del dispositivo (ej: "Cocina", "Almacén") */
   ubicacion: string;
   status: string;
-  tempMin: number;
-  tempMax: number;
-  unidad: string;
-  alertas: boolean;
-  alimentos: string[];
-  /** ID único del ESP32 — se rellena cuando el sensor esté registrado */
-  mqttClientId?: string;
-  /** Tópico MQTT del ESP32 — se rellena cuando el sensor esté registrado */
-  mqttTopic?: string;
+  limiteMin: number;
+  limiteMax: number;
 }
 
 export interface Lectura {
@@ -33,10 +26,8 @@ export interface Lectura {
 
 export interface ConfigDispositivo {
   nombre: string;
-  tempMin: number;
-  tempMax: number;
-  unidad: string;
-  alertas: boolean;
+  limiteMin: number;
+  limiteMax: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -126,10 +117,10 @@ export class DeviceService {
   guardarConfigAlimentos(
     id: number,
     alimentos: string[],
-    tempMin: number,
-    tempMax: number
+    limiteMin: number,
+    limiteMax: number
   ): Observable<{ device: Dispositivo }> {
-    return this.actualizarDispositivo(id, { alimentos, tempMin, tempMax });
+    return this.actualizarDispositivo(id, { limiteMin, limiteMax });
   }
 
   /** Última lectura de temperatura del ESP32 */

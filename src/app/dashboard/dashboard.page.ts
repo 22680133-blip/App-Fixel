@@ -65,8 +65,8 @@ export class DashboardPage implements OnInit {
         this.deviceNombre = this.dispositivo.nombre;
         this.deviceStatus = this.dispositivo.status;
         this.deviceId = this.dispositivo.deviceId || '';
-        this.minTemp = this.dispositivo.tempMin;
-        this.maxTemp = this.dispositivo.tempMax;
+        this.minTemp = this.dispositivo.limiteMin;
+        this.maxTemp = this.dispositivo.limiteMax;
 
         // Cargar la última lectura del sensor
         this.cargarUltimaLectura(this.dispositivo.id);
