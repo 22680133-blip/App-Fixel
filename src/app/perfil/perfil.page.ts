@@ -128,7 +128,10 @@ export class PerfilPage implements OnInit {
           } else if (err.status === 401) {
             this.errorCrear = 'Sesión expirada. Cierra sesión e inicia de nuevo.';
           } else {
-            this.errorCrear = err.error?.mensaje || 'Error al crear el dispositivo. Intenta de nuevo.';
+            const serverMsg =
+              err.error?.mensaje || err.error?.error || err.error?.message;
+            this.errorCrear =
+              serverMsg || 'Error al crear el dispositivo. Intenta de nuevo.';
           }
         },
       });

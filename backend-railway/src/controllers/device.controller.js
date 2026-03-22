@@ -53,14 +53,20 @@ async function generateDeviceCode() {
   return code;
 }
 
+// Helper: obtener userId del request (compatible con ambos middleware)
+function getUserId(req) {
+  return req.userId || req.user?.id;
+}
+
 // ============================================================
 // GET /api/devices — Listar dispositivos del usuario
 // ============================================================
 exports.getDevices = async (req, res) => {
   try {
+    const userId = getUserId(req);
     const result = await pool.query(
       'SELECT * FROM devices WHERE user_id = $1 ORDER BY created_at DESC',
-      [req.userId]
+      [userId]
     );
 
     const devices = result.rows.map(formatDevice);
@@ -76,9 +82,10 @@ exports.getDevices = async (req, res) => {
 // ============================================================
 exports.getDevice = async (req, res) => {
   try {
+    const userId = getUserId(req);
     const result = await pool.query(
       'SELECT * FROM devices WHERE id = $1 AND user_id = $2',
-      [req.params.id, req.userId]
+      [req.params.id, userId]
     );
 
     if (result.rows.length === 0) {
@@ -97,6 +104,7 @@ exports.getDevice = async (req, res) => {
 // ============================================================
 exports.createDevice = async (req, res) => {
   try {
+    const userId = getUserId(req);
     const { nombre, ubicacion, limiteMin, limiteMax } = req.body;
     const deviceCode = await generateDeviceCode();
 
@@ -105,7 +113,7 @@ exports.createDevice = async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
-        req.userId,
+        userId,
         (nombre || 'Mi Refrigerador').trim(),
         (ubicacion || '').trim(),
         limiteMin ?? 2,
@@ -127,12 +135,13 @@ exports.createDevice = async (req, res) => {
 // ============================================================
 exports.updateDevice = async (req, res) => {
   try {
+    const userId = getUserId(req);
     const { nombre, ubicacion, limiteMin, limiteMax } = req.body;
 
     // Verificar que el dispositivo pertenece al usuario
     const check = await pool.query(
       'SELECT * FROM devices WHERE id = $1 AND user_id = $2',
-      [req.params.id, req.userId]
+      [req.params.id, userId]
     );
 
     if (check.rows.length === 0) {
@@ -152,7 +161,7 @@ exports.updateDevice = async (req, res) => {
         limiteMin !== undefined ? limiteMin : current.limite_min,
         limiteMax !== undefined ? limiteMax : current.limite_max,
         req.params.id,
-        req.userId,
+        userId,
       ]
     );
 
@@ -168,9 +177,10 @@ exports.updateDevice = async (req, res) => {
 // ============================================================
 exports.deleteDevice = async (req, res) => {
   try {
+    const userId = getUserId(req);
     const result = await pool.query(
       'DELETE FROM devices WHERE id = $1 AND user_id = $2 RETURNING id',
-      [req.params.id, req.userId]
+      [req.params.id, userId]
     );
 
     if (result.rows.length === 0) {
@@ -183,3 +193,13 @@ exports.deleteDevice = async (req, res) => {
     res.status(500).json({ mensaje: 'Error al eliminar dispositivo' });
   }
 };
+
+// ============================================================
+// Aliases para compatibilidad con rutas existentes en backend-monitoreo
+// (las rutas desplegadas usan .create, .getAll, .getOne, .update, .remove)
+// ============================================================
+exports.create = exports.createDevice;
+exports.getAll = exports.getDevices;
+exports.getOne = exports.getDevice;
+exports.update = exports.updateDevice;
+exports.remove = exports.deleteDevice;
