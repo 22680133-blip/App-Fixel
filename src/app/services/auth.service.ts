@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Usuario {
@@ -26,7 +26,22 @@ export class AuthService {
   register(nombre: string, email: string, password: string): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.API}/register`, { nombre, email, password })
-      .pipe(tap((res) => this.saveSession(res)));
+      .pipe(
+        tap((res) => {
+          if (res.token) {
+            this.saveSession(res);
+          }
+        }),
+        // If register didn't return a token, auto-login to get one
+        switchMap((res) => {
+          if (res.token) {
+            return of(res);
+          }
+          return this.http
+            .post<AuthResponse>(`${this.API}/login`, { email, password })
+            .pipe(tap((loginRes) => this.saveSession(loginRes)));
+        }),
+      );
   }
 
   /** Login con email y contraseña */

@@ -2,10 +2,16 @@ const { Sequelize } = require('sequelize');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Railway internal connections (postgres.railway.internal) don't use SSL.
+// External/proxy connections (*.proxy.rlwy.net) require SSL.
+const databaseUrl = process.env.DATABASE_URL || '';
+const isInternalRailway = databaseUrl.includes('.railway.internal');
+const needsSSL = isProduction && !isInternalRailway;
+
+const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
   logging: isProduction ? false : console.log,
-  dialectOptions: isProduction
+  dialectOptions: needsSSL
     ? { ssl: { require: true, rejectUnauthorized: false } }
     : {},
 });
@@ -24,7 +30,12 @@ const connectDB = async () => {
       require('../models/device.model');
       require('../models/reading.model');
 
-      await sequelize.sync();
+      // In development, alter adds missing columns to existing tables (e.g. picture).
+      // In production, use DB_SYNC_ALTER=true env var to enable; plain sync() is safer.
+      const shouldAlter = isProduction
+        ? process.env.DB_SYNC_ALTER === 'true'
+        : true;
+      await sequelize.sync(shouldAlter ? { alter: true } : undefined);
       console.log('✅ Modelos sincronizados');
       return;
     } catch (err) {

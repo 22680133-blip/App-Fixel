@@ -8,7 +8,7 @@ const Device = sequelize.define(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'Users', key: 'id' },
+      references: { model: 'users', key: 'id' },
     },
 
     // Nombre descriptivo (el usuario puede editarlo en Configuración)
@@ -53,7 +53,7 @@ const Device = sequelize.define(
     // Formato esperado: fixel/{mqttClientId}/data
     mqttTopic: { type: DataTypes.STRING, defaultValue: null },
   },
-  { timestamps: true }
+  { tableName: 'devices', timestamps: true, underscored: true }
 );
 
 module.exports = Device;
