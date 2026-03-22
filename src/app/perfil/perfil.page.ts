@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 import { 
   IonContent,
@@ -36,7 +37,7 @@ export class PerfilPage implements OnInit {
 
   private http = inject(HttpClient);
 
-  API_URL = 'http://localhost:3000/api';
+  API_URL = environment.apiUrl;
 
   usuario:any = null;
   dispositivos:any[] = [];

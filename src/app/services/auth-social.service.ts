@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 declare var FB: any; // Facebook SDK
 declare global {
@@ -12,9 +13,8 @@ declare global {
   providedIn: 'root'
 })
 export class AuthSocialService {
-  // IDs de aplicación - Google Cloud y Facebook Developers
-  GOOGLE_CLIENT_ID = '509438391464-g46hqas49tl42d8vi3r3oj7pnf7ta09p.apps.googleusercontent.com';
-  FACEBOOK_APP_ID = '1632909734518786';
+  GOOGLE_CLIENT_ID = environment.googleClientId;
+  FACEBOOK_APP_ID = environment.facebookAppId;
 
   constructor() {
     this.initFacebookSDK();

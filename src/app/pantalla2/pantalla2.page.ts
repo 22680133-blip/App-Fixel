@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { AuthSocialService } from '../services/auth-social.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-pantalla2',
@@ -24,10 +25,10 @@ export class Pantalla2Page implements OnInit {
   emailError: string = '';
   passwordError: string = '';
 
-  API_URL = 'http://127.0.0.1:3000/api/auth';
+  API_URL = environment.apiUrl + '/auth';
 
   // CLIENT ID DE GOOGLE
-  GOOGLE_CLIENT_ID = '509438391464-g46hqas49tl42d8vi3r3oj7pnf7ta09p.apps.googleusercontent.com';
+  GOOGLE_CLIENT_ID = environment.googleClientId;
 
   private authSocial = inject(AuthSocialService);
   private http = inject(HttpClient);

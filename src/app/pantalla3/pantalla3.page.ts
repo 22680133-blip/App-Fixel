@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-pantalla3',
@@ -32,10 +33,10 @@ export class Pantalla3Page implements OnInit {
   confirmPasswordError: string = '';
 
   // URL DEL BACKEND
-  API_URL = 'http://localhost:3000/api/auth';
+  API_URL = environment.apiUrl + '/auth';
 
   // Google Client ID
-  GOOGLE_CLIENT_ID = '509438391464-s878u81t3tenpf3pad0hvhsp17i0hn7c.apps.googleusercontent.com';
+  GOOGLE_CLIENT_ID = environment.googleClientId;
 
   constructor(
     private http: HttpClient, 
