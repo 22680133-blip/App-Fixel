@@ -25,10 +25,16 @@ const connectDB = async () => {
       await sequelize.authenticate();
       console.log('✅ PostgreSQL conectado');
 
-      // Importar modelos para registrarlos antes de sincronizar
-      require('../models/user.model');
-      require('../models/device.model');
-      require('../models/reading.model');
+      // Define associations between models
+      const User = require('../models/user.model');
+      const Device = require('../models/device.model');
+      const Reading = require('../models/reading.model');
+
+      User.hasMany(Device, { foreignKey: 'userId', onDelete: 'CASCADE' });
+      Device.belongsTo(User, { foreignKey: 'userId' });
+
+      Device.hasMany(Reading, { foreignKey: 'deviceId', onDelete: 'CASCADE' });
+      Reading.belongsTo(Device, { foreignKey: 'deviceId' });
 
       // In development, alter adds missing columns to existing tables (e.g. picture).
       // In production, use DB_SYNC_ALTER=true env var to enable; plain sync() is safer.

@@ -62,11 +62,17 @@ export class Pantalla5Page implements OnInit {
       next: (res) => {
         if (res.devices && res.devices.length > 0) {
           // Actualizar el primer dispositivo con la config de alimentos
-          const deviceId = res.devices[0].id;
+          const device = res.devices[0];
           this.deviceService
-            .guardarConfigAlimentos(deviceId, nombres, this.tempMin, this.tempMax)
+            .guardarConfigAlimentos(device.id, nombres, this.tempMin, this.tempMax)
             .subscribe({
-              next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+              next: (updated) => {
+                // Set as active device so dashboard knows which device to show
+                if (updated.device) {
+                  this.deviceService.setActiveDevice(updated.device);
+                }
+                this.router.navigate(['/dashboard'], { replaceUrl: true });
+              },
               error: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
             });
         } else {
@@ -79,7 +85,13 @@ export class Pantalla5Page implements OnInit {
               tempMax: this.tempMax,
             })
             .subscribe({
-              next: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
+              next: (created) => {
+                // Set newly created device as active
+                if (created.device) {
+                  this.deviceService.setActiveDevice(created.device);
+                }
+                this.router.navigate(['/dashboard'], { replaceUrl: true });
+              },
               error: () => this.router.navigate(['/dashboard'], { replaceUrl: true }),
             });
         }

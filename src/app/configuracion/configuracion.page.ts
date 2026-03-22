@@ -24,7 +24,7 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
   errorMsg = '';
 
   private successTimer: ReturnType<typeof setTimeout> | null = null;
-  private dispositivoId: string | null = null;
+  private dispositivoId: number | null = null;
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
 
@@ -84,9 +84,13 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
         alertas: this.alerts,
       })
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.isLoading = false;
           this.guardado = true;
+          // Update active device with saved configuration
+          if (res.device) {
+            this.deviceService.setActiveDevice(res.device);
+          }
           this.successTimer = setTimeout(() => (this.guardado = false), 3000);
         },
         error: () => {
