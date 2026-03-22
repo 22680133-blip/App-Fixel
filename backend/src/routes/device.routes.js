@@ -12,7 +12,10 @@ router.use(auth);
 // ============================================================
 router.get('/', async (req, res) => {
   try {
-    const devices = await Device.find({ userId: req.userId }).sort({ createdAt: -1 });
+    const devices = await Device.findAll({
+      where: { userId: req.userId },
+      order: [['createdAt', 'DESC']],
+    });
     return res.json({ devices });
   } catch (error) {
     console.error('❌ Error get devices:', error.message);
@@ -25,7 +28,7 @@ router.get('/', async (req, res) => {
 // ============================================================
 router.get('/:id', async (req, res) => {
   try {
-    const device = await Device.findOne({ _id: req.params.id, userId: req.userId });
+    const device = await Device.findOne({ where: { id: req.params.id, userId: req.userId } });
     if (!device) return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
     return res.json({ device });
   } catch (error) {
@@ -62,13 +65,11 @@ router.put('/:id', async (req, res) => {
   try {
     const { nombre, tempMin, tempMax, unidad, alertas, alimentos } = req.body;
 
-    const device = await Device.findOneAndUpdate(
-      { _id: req.params.id, userId: req.userId },
-      { nombre, tempMin, tempMax, unidad, alertas, alimentos },
-      { new: true, runValidators: true }
-    );
+    const device = await Device.findOne({ where: { id: req.params.id, userId: req.userId } });
 
     if (!device) return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
+
+    await device.update({ nombre, tempMin, tempMax, unidad, alertas, alimentos });
     return res.json({ device });
   } catch (error) {
     console.error('❌ Error update device:', error.message);
@@ -81,8 +82,9 @@ router.put('/:id', async (req, res) => {
 // ============================================================
 router.delete('/:id', async (req, res) => {
   try {
-    const device = await Device.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+    const device = await Device.findOne({ where: { id: req.params.id, userId: req.userId } });
     if (!device) return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
+    await device.destroy();
     return res.json({ mensaje: 'Dispositivo eliminado' });
   } catch (error) {
     return res.status(500).json({ mensaje: 'Error al eliminar dispositivo' });

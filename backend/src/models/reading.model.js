@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 /**
  * Lectura de temperatura enviada por el sensor ESP32 vía MQTT/TLS.
@@ -16,33 +17,44 @@ const mongoose = require('mongoose');
  *
  * El servidor MQTT recibe el mensaje y lo guarda aquí.
  */
-const readingSchema = new mongoose.Schema(
+const Reading = sequelize.define(
+  'Reading',
   {
-    deviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Device', required: true },
+    deviceId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: 'Devices', key: 'id' },
+    },
 
     // ============================================================
     // Datos del sensor ESP32
     // ============================================================
 
     // Temperatura en grados Celsius (sensor DS18B20 o similar)
-    temperatura: { type: Number, required: true },
+    temperatura: { type: DataTypes.FLOAT, allowNull: false },
 
     // Humedad relativa % (sensor DHT22, opcional)
-    humedad: { type: Number, default: null },
+    humedad: { type: DataTypes.FLOAT, defaultValue: null },
 
     // Estado del compresor (true = funcionando)
-    compresor: { type: Boolean, default: true },
+    compresor: { type: DataTypes.BOOLEAN, defaultValue: true },
 
     // Estado del suministro eléctrico
-    energia: { type: String, enum: ['Normal', 'Falla'], default: 'Normal' },
+    energia: {
+      type: DataTypes.ENUM('Normal', 'Falla'),
+      defaultValue: 'Normal',
+    },
 
     // Marca de tiempo de la lectura (enviada por el ESP32 o asignada al recibirla)
-    timestamp: { type: Date, default: Date.now },
+    timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
-  { timestamps: false }
+  {
+    timestamps: false,
+    indexes: [
+      // Índice para consultas rápidas por dispositivo y tiempo
+      { fields: ['deviceId', 'timestamp'] },
+    ],
+  }
 );
 
-// Índice para consultas rápidas por dispositivo y tiempo
-readingSchema.index({ deviceId: 1, timestamp: -1 });
-
-module.exports = mongoose.model('Reading', readingSchema);
+module.exports = Reading;

@@ -37,7 +37,7 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
       next: (res) => {
         if (res.devices && res.devices.length > 0) {
           const d: Dispositivo = res.devices[0];
-          this.dispositivoId = d._id;
+          this.dispositivoId = d.id;
           this.deviceName = d.nombre;
           this.minTemp = d.tempMin;
           this.maxTemp = d.tempMax;

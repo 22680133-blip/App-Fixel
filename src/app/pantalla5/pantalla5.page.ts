@@ -62,7 +62,7 @@ export class Pantalla5Page implements OnInit {
       next: (res) => {
         if (res.devices && res.devices.length > 0) {
           // Actualizar el primer dispositivo con la config de alimentos
-          const deviceId = res.devices[0]._id;
+          const deviceId = res.devices[0].id;
           this.deviceService
             .guardarConfigAlimentos(deviceId, nombres, this.tempMin, this.tempMax)
             .subscribe({
