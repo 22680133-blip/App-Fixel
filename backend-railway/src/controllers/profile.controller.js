@@ -110,10 +110,7 @@ exports.updateProfile = async (req, res) => {
           `UPDATE users SET ${fallbackSet.join(', ')} WHERE id = $${idx} RETURNING *`,
           fallbackVals,
         );
-        const row = result.rows[0];
-        row.telefono = row.telefono || '';
-        row.ubicacion = row.ubicacion || '';
-        return res.json({ usuario: formatUser(row) });
+        return res.json({ usuario: formatUser(result.rows[0]) });
       } catch (fallbackError) {
         console.error('Error en fallback de perfil:', fallbackError);
         return res.status(500).json({ mensaje: 'Error al actualizar perfil' });
