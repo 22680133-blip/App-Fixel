@@ -193,14 +193,35 @@ router.put('/profile', auth, async (req, res) => {
     if (!user) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
 
     if (nombre !== undefined) user.nombre = nombre;
-    if (telefono !== undefined) user.telefono = telefono;
-    if (ubicacion !== undefined) user.ubicacion = ubicacion;
     if (picture !== undefined) user.picture = picture || null;
+
+    // telefono/ubicacion may not exist if migration hasn't run yet
+    try {
+      if (telefono !== undefined) user.telefono = telefono;
+      if (ubicacion !== undefined) user.ubicacion = ubicacion;
+    } catch { /* columns may not exist */ }
 
     await user.save();
     return res.json({ usuario: formatUser(user) });
   } catch (error) {
     console.error('❌ Error update profile:', error.message);
+
+    // If column doesn't exist, retry saving only core fields
+    if (error.message && error.message.includes('telefono') || error.message && error.message.includes('ubicacion')) {
+      try {
+        const user = await User.findByPk(req.userId);
+        if (!user) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+        const { nombre, picture } = req.body;
+        if (nombre !== undefined) user.nombre = nombre;
+        if (picture !== undefined) user.picture = picture || null;
+        await user.save();
+        return res.json({ usuario: formatUser(user) });
+      } catch (fallbackError) {
+        console.error('❌ Error fallback profile:', fallbackError.message);
+        return res.status(500).json({ mensaje: 'Error al actualizar perfil' });
+      }
+    }
+
     return res.status(500).json({ mensaje: 'Error al actualizar perfil' });
   }
 });

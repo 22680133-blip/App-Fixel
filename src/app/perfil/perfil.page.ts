@@ -25,6 +25,8 @@ export class PerfilPage implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private readonly MAX_PHOTO_SIZE_MB = 5;
+  private readonly COMPRESSED_MAX_WIDTH = 512;
+  private readonly COMPRESSED_QUALITY = 0.7;
 
   usuario: Usuario | null = this.auth.getUsuario();
   dispositivos: Dispositivo[] = [];
@@ -130,9 +132,7 @@ export class PerfilPage implements OnInit {
       },
       error: (err) => {
         this.savingProfile = false;
-        this.profileError =
-          err.error?.mensaje || err.error?.error || err.error?.message ||
-          'Error al actualizar perfil. Verifica tu conexión.';
+        this.profileError = this.extractProfileError(err);
       },
     });
   }
@@ -245,9 +245,7 @@ export class PerfilPage implements OnInit {
     this.uploadingPhoto = true;
     this.profileError = '';
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
+    this.compressImage(file).then((base64) => {
       this.auth.updateProfile({ picture: base64 }).subscribe({
         next: (res) => {
           this.uploadingPhoto = false;
@@ -257,13 +255,13 @@ export class PerfilPage implements OnInit {
         },
         error: (err) => {
           this.uploadingPhoto = false;
-          this.profileError =
-            err.error?.mensaje || err.error?.error || err.error?.message ||
-            'Error al subir la foto.';
+          this.profileError = this.extractPhotoError(err);
         },
       });
-    };
-    reader.readAsDataURL(file);
+    }).catch(() => {
+      this.uploadingPhoto = false;
+      this.profileError = 'No se pudo procesar la imagen. Intenta con otra.';
+    });
 
     // Reset file input so the same file can be selected again
     input.value = '';
@@ -282,11 +280,76 @@ export class PerfilPage implements OnInit {
       },
       error: (err) => {
         this.uploadingPhoto = false;
-        this.profileError =
-          err.error?.mensaje || err.error?.error || err.error?.message ||
-          'Error al eliminar la foto.';
+        this.profileError = this.extractPhotoError(err);
       },
     });
+  }
+
+  // ============================================================
+  // Helpers
+  // ============================================================
+
+  /** Compress an image file to a smaller base64 data URL */
+  private compressImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Error reading file'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Error loading image'));
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+
+          if (width > this.COMPRESSED_MAX_WIDTH) {
+            height = Math.round(height * (this.COMPRESSED_MAX_WIDTH / width));
+            width = this.COMPRESSED_MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Canvas not supported'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', this.COMPRESSED_QUALITY));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Extract a user-friendly error message for profile updates */
+  private extractProfileError(err: { status?: number; error?: { mensaje?: string; error?: string; message?: string } }): string {
+    if (err.status === 0) {
+      return 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+    }
+    if (err.status === 413) {
+      return 'Los datos son demasiado grandes. Intenta con una imagen más pequeña.';
+    }
+    if (err.status === 401) {
+      return 'Sesión expirada. Cierra sesión e inicia de nuevo.';
+    }
+    return err.error?.mensaje || err.error?.error || err.error?.message ||
+      'Error al actualizar perfil. Verifica tu conexión.';
+  }
+
+  /** Extract a user-friendly error message for photo operations */
+  private extractPhotoError(err: { status?: number; error?: { mensaje?: string; error?: string; message?: string } }): string {
+    if (err.status === 0) {
+      return 'No se puede conectar al servidor. Verifica tu conexión a internet.';
+    }
+    if (err.status === 413) {
+      return 'La imagen es demasiado grande. Intenta con una foto más pequeña.';
+    }
+    if (err.status === 401) {
+      return 'Sesión expirada. Cierra sesión e inicia de nuevo.';
+    }
+    return err.error?.mensaje || err.error?.error || err.error?.message ||
+      'Error al subir la foto. Intenta de nuevo.';
   }
 
   // ============================================================
