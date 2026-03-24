@@ -126,7 +126,7 @@ const connect = () => {
       if (MQTT_CA_CERT_PATH) options.ca = fs.readFileSync(path.resolve(MQTT_CA_CERT_PATH));
       if (MQTT_CLIENT_CERT_PATH) options.cert = fs.readFileSync(path.resolve(MQTT_CLIENT_CERT_PATH));
       if (MQTT_CLIENT_KEY_PATH) options.key = fs.readFileSync(path.resolve(MQTT_CLIENT_KEY_PATH));
-      options.rejectUnauthorized = true;
+      if (options.ca) options.rejectUnauthorized = true;
       console.log('🔐 Certificados TLS cargados para MQTT');
     } catch (certErr) {
       console.warn('⚠️  No se pudieron cargar certificados TLS:', certErr.message);

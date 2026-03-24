@@ -315,7 +315,7 @@ void enviarHTTP(const char* jsonPayload) {
 
   int httpCode = http.POST(jsonPayload);
 
-  if (httpCode == 201) {
+  if (httpCode >= 200 && httpCode < 300) {
     Serial.println("📤 HTTP POST enviado: " + String(jsonPayload));
   } else {
     Serial.println("❌ Error HTTP POST (código: " + String(httpCode) + ")");
