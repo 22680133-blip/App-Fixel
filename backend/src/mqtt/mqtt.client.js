@@ -23,12 +23,12 @@
  * ============================================================
  * PASOS PARA ACTIVAR (cuando el ESP32 esté listo):
  *
- * 1. Genera certificados TLS para tu broker (o usa HiveMQ Cloud).
- * 2. Guarda los certificados en backend/certs/
- * 3. Rellena las variables MQTT_* en tu archivo .env
- * 4. En el firmware del ESP32, usa el mismo mqttClientId que
+ * 1. Configura MQTT_BROKER_URL en tu archivo .env
+ * 2. (Opcional) Si usas TLS, guarda certificados en backend/certs/
+ *    y configura MQTT_CA_CERT_PATH, MQTT_CLIENT_CERT_PATH,
+ *    MQTT_CLIENT_KEY_PATH en .env
+ * 3. En el firmware del ESP32, usa el mismo DEVICE_ID que
  *    tengas registrado en la base de datos del dispositivo.
- * 5. Descomenta el bloque de conexión real más abajo.
  * ============================================================
  */
 
@@ -106,9 +106,6 @@ const handleMessage = async (topic, message) => {
  * Llama a esta función desde server.js después de iniciar el servidor.
  */
 const connect = () => {
-  // ============================================================
-  // TODO: Activar este bloque cuando el broker MQTT esté listo
-  // ============================================================
   if (!MQTT_BROKER_URL) {
     console.log('⚠️  MQTT no configurado — omitiendo conexión (configura MQTT_BROKER_URL en .env)');
     return;
@@ -119,17 +116,23 @@ const connect = () => {
     port: MQTT_PORT,
     username: MQTT_USERNAME,
     password: MQTT_PASSWORD,
-    // ============================================================
-    // Certificados TLS para el ESP32
-    // Descomenta cuando tengas los archivos de certificados
-    // ============================================================
-    // ca: fs.readFileSync(path.resolve(MQTT_CA_CERT_PATH)),
-    // cert: fs.readFileSync(path.resolve(MQTT_CLIENT_CERT_PATH)),
-    // key: fs.readFileSync(path.resolve(MQTT_CLIENT_KEY_PATH)),
-    // rejectUnauthorized: true,
     reconnectPeriod: 5000,
     connectTimeout: 10000,
   };
+
+  // Cargar certificados TLS si están configurados
+  if (MQTT_CA_CERT_PATH || MQTT_CLIENT_CERT_PATH || MQTT_CLIENT_KEY_PATH) {
+    try {
+      if (MQTT_CA_CERT_PATH) options.ca = fs.readFileSync(path.resolve(MQTT_CA_CERT_PATH));
+      if (MQTT_CLIENT_CERT_PATH) options.cert = fs.readFileSync(path.resolve(MQTT_CLIENT_CERT_PATH));
+      if (MQTT_CLIENT_KEY_PATH) options.key = fs.readFileSync(path.resolve(MQTT_CLIENT_KEY_PATH));
+      if (options.ca) options.rejectUnauthorized = true;
+      console.log('🔐 Certificados TLS cargados para MQTT');
+    } catch (certErr) {
+      console.warn('⚠️  No se pudieron cargar certificados TLS:', certErr.message);
+      console.warn('   Conectando sin mTLS (solo usuario/contraseña)');
+    }
+  }
 
   client = mqtt.connect(MQTT_BROKER_URL, options);
 

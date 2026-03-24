@@ -36,6 +36,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <HTTPClient.h>
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
@@ -53,6 +54,11 @@ const char* MQTT_BROKER   = "tu-broker.com";      // ej: broker.hivemq.com
 const int   MQTT_PORT     = 1883;                  // 1883 sin TLS, 8883 con TLS
 const char* MQTT_USER     = "";                    // Usuario MQTT (si aplica)
 const char* MQTT_PASS     = "";                    // Password MQTT (si aplica)
+
+// Backend HTTP (fallback cuando MQTT no está disponible)
+// El ESP32 puede enviar datos vía POST /api/ingest/{DEVICE_ID}
+const char* BACKEND_URL   = "";                    // ej: "https://tu-backend.com"
+const bool  HTTP_FALLBACK = true;                  // true = enviar por HTTP si MQTT falla
 
 // Identificador del dispositivo — Debe coincidir con el device_id
 // registrado en la app (ej: "FRIDGE-A1B2")
@@ -265,8 +271,6 @@ void controlarBuzzer() {
 // ============================================================
 
 void publicarMQTT() {
-  if (!mqttClient.connected()) return;
-
   // Construir JSON con ArduinoJson
   JsonDocument doc;
   doc["temperatura"] = round(temperatura * 10.0) / 10.0;
@@ -277,11 +281,47 @@ void publicarMQTT() {
   char buffer[256];
   size_t len = serializeJson(doc, buffer);
 
-  if (mqttClient.publish(mqttTopic, buffer, len)) {
-    Serial.println("📤 MQTT publicado: " + String(buffer));
-  } else {
-    Serial.println("❌ Error publicando MQTT");
+  bool enviado = false;
+
+  // Intentar enviar por MQTT primero
+  if (mqttClient.connected()) {
+    if (mqttClient.publish(mqttTopic, buffer, len)) {
+      Serial.println("📤 MQTT publicado: " + String(buffer));
+      enviado = true;
+    } else {
+      Serial.println("❌ Error publicando MQTT");
+    }
   }
+
+  // Fallback: enviar por HTTP POST si MQTT no disponible
+  if (!enviado && HTTP_FALLBACK && strlen(BACKEND_URL) > 0) {
+    enviarHTTP(buffer);
+  }
+}
+
+// ============================================================
+// ENVÍO HTTP POST (fallback cuando MQTT no está disponible)
+// Endpoint: POST {BACKEND_URL}/api/ingest/{DEVICE_ID}
+// ============================================================
+
+void enviarHTTP(const char* jsonPayload) {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  String url = String(BACKEND_URL) + "/api/ingest/" + String(DEVICE_ID);
+
+  http.begin(url);
+  http.addHeader("Content-Type", "application/json");
+
+  int httpCode = http.POST(jsonPayload);
+
+  if (httpCode >= 200 && httpCode < 300) {
+    Serial.println("📤 HTTP POST enviado: " + String(jsonPayload));
+  } else {
+    Serial.println("❌ Error HTTP POST (código: " + String(httpCode) + ")");
+  }
+
+  http.end();
 }
 
 // ============================================================

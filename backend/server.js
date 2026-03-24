@@ -8,6 +8,7 @@ const mqttClient = require('./src/mqtt/mqtt.client');
 const authRoutes = require('./src/routes/auth.routes');
 const deviceRoutes = require('./src/routes/device.routes');
 const readingRoutes = require('./src/routes/reading.routes');
+const ingestRoutes = require('./src/routes/ingest.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +67,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/devices', apiLimiter, deviceRoutes);
 app.use('/api/readings', apiLimiter, readingRoutes);
+app.use('/api/ingest', apiLimiter, ingestRoutes);
 
 // Health check
 app.get('/', async (req, res) => {
