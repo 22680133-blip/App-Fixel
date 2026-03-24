@@ -114,8 +114,9 @@
       {{getDisplayTemp(temperaturaNum)}}{{unitSymbol}}
     </div>
 
-    <p class="temp-status" *ngIf="temperaturaNum !== null">
-      {{fueraDeRango ? '⚠️ Fuera de rango' : '✅ Normal'}}
+    <p class="temp-status" *ngIf="temperaturaNum !== null"
+       [ngClass]="{'estado-normal': estado === 'NORMAL', 'estado-alta': estado === 'ALTA', 'estado-baja': estado === 'BAJA'}">
+      Estado: {{estado}}
     </p>
 
   </div>
@@ -126,12 +127,14 @@
 
     <div class="min-card">
       <h4>❄️ Mínimo</h4>
-      <p>{{getDisplayTemp(minTemp)}}{{unitSymbol}}</p>
+      <p>{{getDisplayTemp(tempMinRegistrada)}}{{unitSymbol}}</p>
+      <span class="limit-ref">Límite: {{getDisplayTemp(minTemp)}}{{unitSymbol}}</span>
     </div>
 
     <div class="max-card">
       <h4>🔥 Máximo</h4>
-      <p>{{getDisplayTemp(maxTemp)}}{{unitSymbol}}</p>
+      <p>{{getDisplayTemp(tempMaxRegistrada)}}{{unitSymbol}}</p>
+      <span class="limit-ref">Límite: {{getDisplayTemp(maxTemp)}}{{unitSymbol}}</span>
     </div>
 
   </div>

@@ -340,6 +340,13 @@
   margin: 0;
 }
 
+.min-card .limit-ref {
+  color: rgba(0, 229, 255, 0.5);
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
+}
+
 .max-card {
   background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(255, 61, 110, 0.05));
   border: 2px solid rgba(255, 107, 157, 0.2);
@@ -370,6 +377,13 @@
   font-size: 22px;
   font-weight: 700;
   margin: 0;
+}
+
+.max-card .limit-ref {
+  color: rgba(255, 107, 157, 0.5);
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
 }
 
 /* HISTORY */
@@ -508,6 +522,20 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
   margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Estado colors matching ESP32 logic */
+.estado-normal {
+  color: #00ff6a !important;
+}
+
+.estado-alta {
+  color: #ff3d6e !important;
+}
+
+.estado-baja {
+  color: #00b0ff !important;
 }
 
 .temp-alert {
