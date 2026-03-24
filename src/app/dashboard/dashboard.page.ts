@@ -203,8 +203,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
         if (res.readings && res.readings.length > 0) {
           // Calculate recorded min/max from history (ESP32 logic)
           const temps = res.readings.map((r) => r.temperatura);
-          this.tempMinRegistrada = Math.min(...temps);
-          this.tempMaxRegistrada = Math.max(...temps);
+          this.tempMinRegistrada = temps.reduce((min, t) => Math.min(min, t), temps[0]);
+          this.tempMaxRegistrada = temps.reduce((max, t) => Math.max(max, t), temps[0]);
 
           this.renderChart(res.readings);
         }
