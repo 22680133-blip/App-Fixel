@@ -39,6 +39,13 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   // Unidad de temperatura (°C / °F)
   unit: 'C' | 'F' = 'C';
 
+  // Estado de temperatura (lógica ESP32: NORMAL, ALTA, BAJA)
+  estado: 'NORMAL' | 'ALTA' | 'BAJA' = 'NORMAL';
+
+  // Temperaturas mínima y máxima registradas (calculadas del historial)
+  tempMinRegistrada: number | null = null;
+  tempMaxRegistrada: number | null = null;
+
   // Alerta de temperatura fuera de rango
   fueraDeRango = false;
   alertaTempMsg = '';
@@ -194,6 +201,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
     this.deviceService.getHistorial(deviceId).subscribe({
       next: (res) => {
         if (res.readings && res.readings.length > 0) {
+          // Calculate recorded min/max from history (ESP32 logic)
+          const temps = res.readings.map((r) => r.temperatura);
+          this.tempMinRegistrada = Math.min(...temps);
+          this.tempMaxRegistrada = Math.max(...temps);
+
           this.renderChart(res.readings);
         }
       },
@@ -271,16 +283,20 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
   private evaluarAlerta() {
     if (this.temperaturaNum === null) {
       this.fueraDeRango = false;
+      this.estado = 'NORMAL';
       return;
     }
     if (this.temperaturaNum < this.minTemp) {
       this.fueraDeRango = true;
+      this.estado = 'BAJA';
       this.alertaTempMsg = `La temperatura (${this.getDisplayTemp(this.temperaturaNum)}${this.unitSymbol}) está por debajo del mínimo configurado (${this.getDisplayTemp(this.minTemp)}${this.unitSymbol}).`;
     } else if (this.temperaturaNum > this.maxTemp) {
       this.fueraDeRango = true;
+      this.estado = 'ALTA';
       this.alertaTempMsg = `La temperatura (${this.getDisplayTemp(this.temperaturaNum)}${this.unitSymbol}) está por encima del máximo configurado (${this.getDisplayTemp(this.maxTemp)}${this.unitSymbol}).`;
     } else {
       this.fueraDeRango = false;
+      this.estado = 'NORMAL';
       this.alertaTempMsg = '';
     }
   }
