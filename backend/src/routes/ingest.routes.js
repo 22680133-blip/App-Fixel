@@ -6,7 +6,8 @@ const router = express.Router();
 
 /**
  * ============================================================
- * POST /api/ingest/:deviceCode
+ * POST /api/ingest/:deviceCode   — device code en URL
+ * POST /api/ingest               — device code en body (device_code)
  * ============================================================
  *
  * Endpoint público para que el ESP32 envíe lecturas vía HTTP
@@ -18,16 +19,23 @@ const router = express.Router();
  *
  * Body JSON esperado (mismo formato que el payload MQTT):
  *   {
+ *     "device_code": "FRIDGE-A1B2",  (solo si no se usa :deviceCode en URL)
  *     "temperatura": 5.2,
  *     "humedad": 65.0,
  *     "compresor": true,
  *     "energia": "Normal"
  *   }
  */
-router.post('/:deviceCode', async (req, res) => {
+router.post(['/', '/:deviceCode'], async (req, res) => {
   try {
-    const { deviceCode } = req.params;
+    const rawCode = req.params.deviceCode || req.body.device_code;
     const { temperatura, humedad, compresor, energia } = req.body;
+
+    if (!rawCode || typeof rawCode !== 'string' || !rawCode.trim()) {
+      return res.status(400).json({ mensaje: 'device_code es requerido (en URL o body)' });
+    }
+
+    const deviceCode = rawCode.trim();
 
     if (temperatura === undefined || temperatura === null) {
       return res.status(400).json({ mensaje: 'Campo "temperatura" es requerido' });
