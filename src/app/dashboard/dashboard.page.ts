@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, ViewWillEnter } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -15,7 +15,7 @@ Chart.register(...registerables);
   standalone: true,
   imports: [IonContent, CommonModule],
 })
-export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
+export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter {
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Datos del usuario
@@ -76,11 +76,26 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit {
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
-    this.cargarDatos();
+    // Data loading is handled by ionViewWillEnter (fires on every page enter, including first)
   }
 
   ngAfterViewInit() {
     // Chart will be initialized after data is loaded
+  }
+
+  /** Ionic lifecycle: fires every time the page becomes active (e.g. coming back from profile) */
+  ionViewWillEnter() {
+    // Reload user name (may have changed in profile)
+    const usuario = this.auth.getUsuario();
+    if (usuario) {
+      this.nombreUsuario = usuario.nombre || usuario.email;
+    }
+    // Reload unit preference and data whenever the user navigates back
+    const savedUnit = localStorage.getItem('tempUnit');
+    if (savedUnit === 'F' || savedUnit === 'C') {
+      this.unit = savedUnit;
+    }
+    this.cargarDatos();
   }
 
   ngOnDestroy() {

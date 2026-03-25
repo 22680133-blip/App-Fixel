@@ -325,6 +325,25 @@
   box-shadow: 0 6px 16px rgba(0, 229, 255, 0.4);
 }
 
+.delete-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 61, 110, 0.4);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ff6b9d;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.delete-btn:hover {
+  background: rgba(255, 61, 110, 0.12);
+  border-color: #ff3d6e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 61, 110, 0.3);
+}
+
 .add-device {
   margin-top: 15px;
   width: 100%;
@@ -606,6 +625,40 @@
   font-size: 12px;
   margin: 12px 0 20px 0;
   line-height: 1.4;
+}
+
+/* Modal: Confirmar eliminación */
+.modal-delete {
+  text-align: center;
+}
+
+.delete-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.modal-btn-delete {
+  flex: 1;
+  padding: 12px;
+  background: linear-gradient(135deg, #ff3d6e, #ff6b9d);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.modal-btn-delete:hover {
+  box-shadow: 0 6px 20px rgba(255, 61, 110, 0.4);
+  transform: translateY(-2px);
+}
+
+.modal-btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* EDIT PROFILE */

@@ -105,6 +105,13 @@ export class DeviceService {
     });
   }
 
+  /** Eliminar un dispositivo */
+  eliminarDispositivo(id: number): Observable<{ mensaje: string }> {
+    return this.http.delete<{ mensaje: string }>(`${this.API}/devices/${id}`, {
+      headers: this.headers,
+    });
+  }
+
   /** Guardar configuración de temperatura y alertas (desde pantalla Configuración) */
   guardarConfiguracion(
     id: number,
