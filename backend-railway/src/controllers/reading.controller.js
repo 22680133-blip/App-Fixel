@@ -12,6 +12,8 @@
  */
 const pool = require('../config/db');
 
+const HISTORY_HOURS = 24;
+
 // ============================================================
 // Helper: obtener userId del request
 // ============================================================
@@ -68,7 +70,7 @@ exports.getHistory = async (req, res) => {
       return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
     }
 
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const since = new Date(Date.now() - HISTORY_HOURS * 60 * 60 * 1000);
     const result = await pool.query(
       'SELECT * FROM readings WHERE device_id = $1 AND timestamp >= $2 ORDER BY timestamp ASC',
       [deviceId, since]

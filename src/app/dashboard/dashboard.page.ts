@@ -76,7 +76,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
-    // Data loading is handled by ionViewWillEnter (fires on every page enter, including first)
   }
 
   ngAfterViewInit() {
