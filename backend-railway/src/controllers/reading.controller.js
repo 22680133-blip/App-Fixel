@@ -93,8 +93,8 @@ function formatReading(row) {
     deviceId: row.device_id,
     temperatura: parseFloat(row.temperatura),
     humedad: row.humedad != null ? parseFloat(row.humedad) : null,
-    compresor: row.compresor,
-    energia: row.energia,
-    timestamp: row.timestamp,
+    compresor: row.compresor ?? true,
+    energia: row.energia || 'Normal',
+    timestamp: row.timestamp || row.created_at,
   };
 }

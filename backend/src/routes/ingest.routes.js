@@ -42,8 +42,14 @@ router.post(['/', '/:deviceCode'], async (req, res) => {
     }
 
     // Buscar dispositivo por device_code o por external device_id
+    const { Op } = require('sequelize');
     const device = await Device.findOne({
-      where: { deviceId: deviceCode },
+      where: {
+        [Op.or]: [
+          { deviceId: deviceCode },
+          { externalDeviceId: deviceCode },
+        ],
+      },
     });
 
     if (!device) {
