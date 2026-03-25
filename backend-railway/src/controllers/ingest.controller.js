@@ -2,18 +2,26 @@
  * Controlador de ingesta HTTP — raw pg
  *
  * Endpoint público para que el ESP32 envíe lecturas vía HTTP.
- * El ESP32 se identifica con su device_code (ej: "FRIDGE-A1B2").
+ * El ESP32 se identifica con su device_code (ej: "FRIDGE-A1B2"),
+ * ya sea como parámetro en la URL o en el body del request.
  * No requiere JWT — la autenticación se basa en el código único.
  */
 const pool = require('../config/db');
 
 // ============================================================
-// POST /api/ingest/:deviceCode
+// POST /api/ingest/:deviceCode  — device code en URL
+// POST /api/ingest              — device code en body (device_code)
 // ============================================================
 exports.ingest = async (req, res) => {
   try {
-    const { deviceCode } = req.params;
+    const rawCode = req.params.deviceCode || req.body.device_code;
     const { temperatura, humedad, compresor, energia } = req.body;
+
+    if (!rawCode || typeof rawCode !== 'string' || !rawCode.trim()) {
+      return res.status(400).json({ mensaje: 'device_code es requerido (en URL o body)' });
+    }
+
+    const deviceCode = rawCode.trim();
 
     if (temperatura === undefined || temperatura === null) {
       return res.status(400).json({ mensaje: 'Campo "temperatura" es requerido' });
