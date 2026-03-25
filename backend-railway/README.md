@@ -1,7 +1,7 @@
 # Archivos para Railway (backend-monitoreo)
 
-Estos archivos agregan los endpoints `/api/devices`, `/api/auth/profile` y
-`/api/auth/password` al backend-monitoreo desplegado en Railway.
+Estos archivos agregan los endpoints `/api/devices`, `/api/readings`, `/api/ingest`,
+`/api/auth/profile` y `/api/auth/password` al backend-monitoreo desplegado en Railway.
 **No tocan la autenticación existente (login/register).**
 
 ## Archivos a copiar
@@ -13,8 +13,12 @@ Copia estos archivos a tu repositorio `backend-monitoreo`:
 | `src/app.js`                                | `src/app.js`                                   | **Reemplazar** |
 | `src/middleware/auth.js`                     | `src/middleware/auth.js`                        | **Crear**     |
 | `src/controllers/device.controller.js`      | `src/controllers/device.controller.js`          | **Crear**     |
+| `src/controllers/reading.controller.js`     | `src/controllers/reading.controller.js`         | **Crear**     |
+| `src/controllers/ingest.controller.js`      | `src/controllers/ingest.controller.js`          | **Crear**     |
 | `src/controllers/profile.controller.js`     | `src/controllers/profile.controller.js`         | **Crear**     |
 | `src/routes/devices.js`                     | `src/routes/devices.js`                         | **Reemplazar** |
+| `src/routes/readings.js`                    | `src/routes/readings.js`                        | **Crear**     |
+| `src/routes/ingest.js`                      | `src/routes/ingest.js`                          | **Crear**     |
 | `src/routes/profile.js`                     | `src/routes/profile.js`                         | **Crear**     |
 
 ## SQL — Agregar columnas para perfil
@@ -24,6 +28,20 @@ Ejecuta este SQL en tu base de datos de Railway **antes** de desplegar:
 ```sql
 ALTER TABLE users ADD COLUMN IF NOT EXISTS telefono VARCHAR DEFAULT NULL;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ubicacion VARCHAR DEFAULT NULL;
+```
+
+## SQL — Crear tabla readings (para lecturas del ESP32)
+
+```sql
+CREATE TABLE IF NOT EXISTS readings (
+  id          SERIAL PRIMARY KEY,
+  device_id   INTEGER REFERENCES devices(id) ON DELETE CASCADE,
+  temperatura FLOAT NOT NULL,
+  humedad     FLOAT,
+  compresor   BOOLEAN DEFAULT true,
+  energia     VARCHAR DEFAULT 'Normal',
+  timestamp   TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ## Pasos
@@ -49,6 +67,13 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS ubicacion VARCHAR DEFAULT NULL;
   - `POST /api/devices` → Crea un dispositivo (auto-genera código "FRIDGE-XXXX")
   - `PUT /api/devices/:id` → Actualiza nombre, ubicación, límites
   - `DELETE /api/devices/:id` → Elimina un dispositivo
+
+- **`src/controllers/reading.controller.js`** — Lecturas de temperatura:
+  - `GET /api/readings/latest/:deviceId` → Última lectura del dispositivo
+  - `GET /api/readings/history/:deviceId` → Historial de las últimas 24 horas
+
+- **`src/controllers/ingest.controller.js`** — Ingesta HTTP para ESP32:
+  - `POST /api/ingest/:deviceCode` → Recibe lecturas del ESP32 (público, sin JWT)
 
 - **`src/controllers/profile.controller.js`** — Gestión de perfil:
   - `PUT /api/auth/profile` → Actualiza nombre, teléfono, ubicación, picture

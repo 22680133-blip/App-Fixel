@@ -155,6 +155,9 @@
       <button class="config-btn" (click)="configurarDispositivo(device); $event.stopPropagation()">
         Configurar →
       </button>
+      <button class="delete-btn" (click)="abrirDeleteModal(device); $event.stopPropagation()">
+        🗑️ Eliminar
+      </button>
     </div>
 
   </div>
@@ -271,6 +274,31 @@ Frixel v1.0
     <p class="modal-hint">⚠️ Configura este ID en el firmware de tu ESP32 para vincular el sensor con la app.</p>
 
     <button class="modal-btn-save" (click)="cerrarDeviceIdModal()">Entendido</button>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- MODAL: Confirmar Eliminación de Dispositivo                   -->
+<!-- ============================================================ -->
+<div class="modal-overlay" *ngIf="mostrarDeleteModal" (click)="cerrarDeleteModal()">
+  <div class="modal-content modal-delete" (click)="$event.stopPropagation()">
+    <div class="delete-icon">🗑️</div>
+    <h3>Eliminar Dispositivo</h3>
+    <p class="modal-desc">
+      ¿Estás seguro de que deseas eliminar
+      <strong>{{dispositivoAEliminar?.nombre}}</strong>?
+      Esta acción no se puede deshacer y se perderán todos los datos asociados.
+    </p>
+
+    <p class="modal-error" *ngIf="errorEliminar">{{errorEliminar}}</p>
+
+    <div class="modal-buttons">
+      <button class="modal-btn-cancel" (click)="cerrarDeleteModal()">Cancelar</button>
+      <button class="modal-btn-delete" (click)="confirmarEliminar()" [disabled]="eliminandoDispositivo">
+        {{ eliminandoDispositivo ? 'Eliminando...' : 'Eliminar' }}
+      </button>
+    </div>
   </div>
 </div>
 

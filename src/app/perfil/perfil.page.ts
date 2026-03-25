@@ -54,6 +54,12 @@ export class PerfilPage implements OnInit {
   mostrarDeviceIdModal = false;
   deviceIdCreado = '';
 
+  // Modal "Confirmar eliminación"
+  mostrarDeleteModal = false;
+  dispositivoAEliminar: Dispositivo | null = null;
+  eliminandoDispositivo = false;
+  errorEliminar = '';
+
   ngOnInit() {
     if (this.usuario) {
       this.editNombre = this.usuario.nombre || '';
@@ -142,6 +148,7 @@ export class PerfilPage implements OnInit {
   // ============================================================
   seleccionarDispositivo(device: Dispositivo) {
     this.deviceService.setActiveDevice(device);
+    this.router.navigate(['/dashboard']);
   }
 
   esDispositivoActivo(device: Dispositivo): boolean {
@@ -217,6 +224,58 @@ export class PerfilPage implements OnInit {
 
   cerrarDeviceIdModal() {
     this.mostrarDeviceIdModal = false;
+  }
+
+  // ============================================================
+  // Eliminar dispositivo
+  // ============================================================
+  abrirDeleteModal(device: Dispositivo) {
+    this.dispositivoAEliminar = device;
+    this.errorEliminar = '';
+    this.mostrarDeleteModal = true;
+  }
+
+  cerrarDeleteModal() {
+    this.mostrarDeleteModal = false;
+    this.dispositivoAEliminar = null;
+  }
+
+  confirmarEliminar() {
+    if (!this.dispositivoAEliminar) return;
+
+    this.eliminandoDispositivo = true;
+    this.errorEliminar = '';
+
+    const deviceId = this.dispositivoAEliminar.id;
+
+    this.deviceService.eliminarDispositivo(deviceId).subscribe({
+      next: () => {
+        this.eliminandoDispositivo = false;
+        this.mostrarDeleteModal = false;
+
+        // Si el dispositivo eliminado era el activo, limpiar selección
+        const active = this.deviceService.getActiveDevice();
+        if (active && active.id === deviceId) {
+          this.deviceService.setActiveDevice(null);
+        }
+
+        this.dispositivoAEliminar = null;
+        this.cargarDispositivos();
+      },
+      error: (err) => {
+        this.eliminandoDispositivo = false;
+        if (err.status === 0) {
+          this.errorEliminar = 'No se puede conectar al servidor.';
+        } else if (err.status === 401) {
+          this.errorEliminar = 'Sesión expirada. Cierra sesión e inicia de nuevo.';
+        } else {
+          const serverMsg =
+            err.error?.mensaje || err.error?.error || err.error?.message;
+          this.errorEliminar =
+            serverMsg || 'Error al eliminar el dispositivo.';
+        }
+      },
+    });
   }
 
   // ============================================================
