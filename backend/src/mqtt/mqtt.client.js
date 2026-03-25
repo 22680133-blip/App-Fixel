@@ -35,6 +35,7 @@
 const mqtt = require('mqtt');
 const fs = require('fs');
 const path = require('path');
+const { Op } = require('sequelize');
 const Device = require('../models/device.model');
 const Reading = require('../models/reading.model');
 
@@ -76,7 +77,6 @@ const handleMessage = async (topic, message) => {
     }
 
     // Buscar el dispositivo por su externalDeviceId (columna device_id) o device_code
-    const { Op } = require('sequelize');
     const device = await Device.findOne({
       where: {
         [Op.or]: [

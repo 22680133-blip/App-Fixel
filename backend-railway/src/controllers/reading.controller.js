@@ -93,6 +93,8 @@ function formatReading(row) {
     deviceId: row.device_id,
     temperatura: parseFloat(row.temperatura),
     humedad: row.humedad != null ? parseFloat(row.humedad) : null,
+    // Default compresor to true (compressor running) when the field is missing,
+    // which happens when the deployed backend doesn't store this column.
     compresor: row.compresor ?? true,
     energia: row.energia || 'Normal',
     timestamp: row.timestamp || row.created_at,
