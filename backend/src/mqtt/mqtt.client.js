@@ -35,6 +35,7 @@
 const mqtt = require('mqtt');
 const fs = require('fs');
 const path = require('path');
+const { Op } = require('sequelize');
 const Device = require('../models/device.model');
 const Reading = require('../models/reading.model');
 
@@ -75,8 +76,15 @@ const handleMessage = async (topic, message) => {
       return;
     }
 
-    // Buscar el dispositivo por su externalDeviceId (columna device_id)
-    const device = await Device.findOne({ where: { externalDeviceId: deviceIdentifier } });
+    // Buscar el dispositivo por su externalDeviceId (columna device_id) o device_code
+    const device = await Device.findOne({
+      where: {
+        [Op.or]: [
+          { externalDeviceId: deviceIdentifier },
+          { deviceId: deviceIdentifier },
+        ],
+      },
+    });
     if (!device) {
       console.warn(`⚠️ Dispositivo no registrado: ${deviceIdentifier}`);
       return;

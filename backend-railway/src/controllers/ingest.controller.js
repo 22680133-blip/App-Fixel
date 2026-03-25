@@ -27,9 +27,9 @@ exports.ingest = async (req, res) => {
       return res.status(400).json({ mensaje: 'Campo "temperatura" es requerido' });
     }
 
-    // Buscar dispositivo por device_code
+    // Buscar dispositivo por device_code o device_id (compatible con ESP32)
     const deviceResult = await pool.query(
-      'SELECT id FROM devices WHERE device_code = $1 LIMIT 1',
+      'SELECT id FROM devices WHERE device_code = $1 OR device_id = $1 LIMIT 1',
       [deviceCode]
     );
 

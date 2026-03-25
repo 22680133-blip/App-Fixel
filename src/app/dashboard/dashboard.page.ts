@@ -178,9 +178,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
           return;
         }
         const lectura: Lectura = res.reading;
+        // Normalize timestamp field (deployed backend may use created_at)
+        const readingTimestamp = lectura.timestamp || (lectura as any).created_at;
         this.temperaturaNum = lectura.temperatura;
         this.temperatura = lectura.temperatura.toFixed(1);
-        this.energia = lectura.energia;
+        this.energia = lectura.energia || 'Normal';
 
         // Compressor logic: ON if temp > max, OFF if within range
         if (this.temperaturaNum > this.maxTemp) {
@@ -189,14 +191,14 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
           this.compresor = 'Apagado';
         }
 
-        const fecha = new Date(lectura.timestamp);
+        const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
         this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
 
-        // Connection status based on timestamp (connected if last reading < 30 seconds ago)
+        // Connection status based on timestamp (connected if last reading < 60 seconds ago)
         const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
-        if (lectura.energia === 'Falla') {
+        if ((lectura.energia || 'Normal') === 'Falla') {
           this.deviceStatus = 'alerta';
-        } else if (secondsAgo <= 30) {
+        } else if (secondsAgo <= 60) {
           this.deviceStatus = 'activo';
         } else {
           this.deviceStatus = 'desconectado';
@@ -232,7 +234,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     if (!this.chartCanvas) return;
 
     const labels = readings.map((r) => {
-      const d = new Date(r.timestamp);
+      const ts = r.timestamp || (r as any).created_at;
+      const d = ts ? new Date(ts) : new Date();
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     });
 

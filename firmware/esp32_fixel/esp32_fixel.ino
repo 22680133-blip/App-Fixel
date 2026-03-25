@@ -277,6 +277,7 @@ void publicarMQTT() {
   doc["humedad"]     = round(humedad * 10.0) / 10.0;
   doc["compresor"]   = compresor;
   doc["energia"]     = energia;
+  doc["device_code"] = DEVICE_ID;
 
   char buffer[256];
   size_t len = serializeJson(doc, buffer);
