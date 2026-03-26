@@ -33,6 +33,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   // Datos de temperatura (del sensor ESP32 vía MQTT)
   temperatura = '--';
   temperaturaNum: number | null = null;
+  humedadActual: number | null = null;
   energia = 'Normal';
   compresor = 'Apagado';
   ultimaActualizacion = '--:--';
@@ -51,9 +52,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   fueraDeRango = false;
   alertaTempMsg = '';
 
-  // Lecturas del endpoint /api/readings
-  readings: Reading[] = [];
-  readingsError = '';
+  // Tracks whether the device-specific endpoints returned data
+  private deviceEndpointHadData = false;
+  private deviceHistorialHadData = false;
 
   // Estado de carga y error
   isLoading = true;
@@ -178,61 +179,105 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       next: (res) => {
         this.isLoading = false;
         if (!res.reading) {
+          this.deviceEndpointHadData = false;
           this.sinDatos = false;
           this.deviceStatus = 'desconectado';
           return;
         }
-        const lectura: Lectura = res.reading;
-        // Normalize timestamp field (deployed backend may use created_at)
-        const readingTimestamp = lectura.timestamp || (lectura as any).created_at;
-        this.temperaturaNum = lectura.temperatura;
-        this.temperatura = lectura.temperatura.toFixed(1);
-        this.energia = lectura.energia || 'Normal';
-
-        // Compressor logic: ON if temp > max, OFF if within range
-        if (this.temperaturaNum > this.maxTemp) {
-          this.compresor = 'Encendido';
-        } else {
-          this.compresor = 'Apagado';
-        }
-
-        const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
-        this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
-
-        // Connection status based on timestamp (connected if last reading < 60 seconds ago)
-        const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
-        if ((lectura.energia || 'Normal') === 'Falla') {
-          this.deviceStatus = 'alerta';
-        } else if (secondsAgo <= 60) {
-          this.deviceStatus = 'activo';
-        } else {
-          this.deviceStatus = 'desconectado';
-        }
-
-        // Evaluar si la temperatura está fuera de rango
-        this.evaluarAlerta();
+        this.deviceEndpointHadData = true;
+        this.applyLectura(res.reading);
       },
       error: () => {
         this.isLoading = false;
+        this.deviceEndpointHadData = false;
       },
     });
+  }
+
+  /** Applies a Lectura (from device-specific endpoint) to the dashboard state */
+  private applyLectura(lectura: Lectura) {
+    const readingTimestamp = lectura.timestamp || (lectura as any).created_at;
+    this.temperaturaNum = lectura.temperatura;
+    this.temperatura = lectura.temperatura.toFixed(1);
+    this.humedadActual = lectura.humedad;
+    this.energia = lectura.energia || 'Normal';
+
+    // Compressor logic: ON if temp > max, OFF if within range
+    if (this.temperaturaNum > this.maxTemp) {
+      this.compresor = 'Encendido';
+    } else {
+      this.compresor = 'Apagado';
+    }
+
+    const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
+    this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+
+    // Connection status based on timestamp (connected if last reading < 60 seconds ago)
+    const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
+    if ((lectura.energia || 'Normal') === 'Falla') {
+      this.deviceStatus = 'alerta';
+    } else if (secondsAgo <= 60) {
+      this.deviceStatus = 'activo';
+    } else {
+      this.deviceStatus = 'desconectado';
+    }
+
+    this.evaluarAlerta();
+  }
+
+  /** Applies a Reading (from /api/readings fallback) to the dashboard state */
+  private applyReading(reading: Reading) {
+    const readingTimestamp = reading.timestamp || reading.created_at;
+    this.temperaturaNum = reading.temperatura;
+    this.temperatura = reading.temperatura.toFixed(1);
+    this.humedadActual = reading.humedad;
+    this.energia = 'Normal';
+
+    // Compressor logic: ON if temp > max, OFF if within range
+    if (this.temperaturaNum > this.maxTemp) {
+      this.compresor = 'Encendido';
+    } else {
+      this.compresor = 'Apagado';
+    }
+
+    const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
+    this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+
+    // Connection status based on timestamp (connected if last reading < 60 seconds ago)
+    const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
+    if (secondsAgo <= 60) {
+      this.deviceStatus = 'activo';
+    } else {
+      this.deviceStatus = 'desconectado';
+    }
+
+    this.evaluarAlerta();
   }
 
   private cargarHistorial(deviceId: number) {
     this.deviceService.getHistorial(deviceId).subscribe({
       next: (res) => {
         if (res.readings && res.readings.length > 0) {
-          // Calculate recorded min/max from history (ESP32 logic)
-          const temps = res.readings.map((r) => r.temperatura).filter((t) => t != null);
-          if (temps.length > 0) {
-            this.tempMinRegistrada = temps.reduce((min, t) => Math.min(min, t), temps[0]);
-            this.tempMaxRegistrada = temps.reduce((max, t) => Math.max(max, t), temps[0]);
-          }
-
+          this.deviceHistorialHadData = true;
+          this.updateMinMaxFromTemps(res.readings.map((r) => r.temperatura));
           this.renderChart(res.readings);
+        } else {
+          this.deviceHistorialHadData = false;
         }
       },
+      error: () => {
+        this.deviceHistorialHadData = false;
+      },
     });
+  }
+
+  /** Updates min/max temperatures from an array of temperature values */
+  private updateMinMaxFromTemps(temps: number[]) {
+    const valid = temps.filter((t) => t != null);
+    if (valid.length > 0) {
+      this.tempMinRegistrada = valid.reduce((min, t) => Math.min(min, t), valid[0]);
+      this.tempMaxRegistrada = valid.reduce((max, t) => Math.max(max, t), valid[0]);
+    }
   }
 
   private renderChart(readings: Lectura[]) {
@@ -247,6 +292,30 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     const temps = readings.map((r) =>
       this.unit === 'F' ? this.toFahrenheit(r.temperatura) : r.temperatura
     );
+
+    this.updateChart(labels, temps);
+  }
+
+  /** Renders chart from Reading[] (fallback from /api/readings) */
+  private renderChartFromReadings(readings: Reading[]) {
+    if (!this.chartCanvas) return;
+
+    const labels = readings.map((r) => {
+      const ts = r.timestamp || r.created_at;
+      const d = ts ? new Date(ts) : new Date();
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    const temps = readings.map((r) =>
+      this.unit === 'F' ? this.toFahrenheit(r.temperatura) : r.temperatura
+    );
+
+    this.updateChart(labels, temps);
+  }
+
+  /** Creates or updates the Chart.js instance */
+  private updateChart(labels: string[], temps: number[]) {
+    if (!this.chartCanvas) return;
 
     if (this.chart) {
       this.chart.data.labels = labels;
@@ -305,17 +374,46 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     }, this.POLL_SECONDS * 1000);
   }
 
-  /** Cargar lecturas desde el endpoint /api/readings */
+  /**
+   * Fetch readings from the /api/readings endpoint.
+   * When the device-specific endpoints returned no data, this serves as a
+   * fallback to populate the main dashboard with real ESP32 data.
+   */
   private cargarReadings() {
     this.readingsService.getReadings().subscribe({
       next: (data) => {
-        console.log('Datos recibidos:', data);
-        this.readings = data;
-        this.readingsError = '';
+        if (!data || data.length === 0) return;
+
+        // Filter readings for the active device (match by device_code / deviceId)
+        const deviceReadings = this.deviceId
+          ? data.filter((r) => r.device_code === this.deviceId)
+          : data;
+
+        // Use all received readings if no device match found
+        const relevantReadings = deviceReadings.length > 0 ? deviceReadings : data;
+
+        // Sort by timestamp ascending for chart rendering
+        const sorted = [...relevantReadings].sort((a, b) => {
+          const tsA = new Date(a.timestamp || a.created_at || 0).getTime();
+          const tsB = new Date(b.timestamp || b.created_at || 0).getTime();
+          return tsA - tsB;
+        });
+
+        // Fallback: populate main dashboard if device-specific endpoint had no data
+        if (!this.deviceEndpointHadData && sorted.length > 0) {
+          this.isLoading = false;
+          const latest = sorted[sorted.length - 1];
+          this.applyReading(latest);
+        }
+
+        // Fallback: populate min/max and chart if device history had no data
+        if (!this.deviceHistorialHadData && sorted.length > 0) {
+          this.updateMinMaxFromTemps(sorted.map((r) => r.temperatura));
+          this.renderChartFromReadings(sorted);
+        }
       },
-      error: (err) => {
-        console.error('Error al obtener lecturas:', err);
-        this.readingsError = 'No se pudieron cargar las lecturas del sensor.';
+      error: () => {
+        // Silently handle – device-specific endpoints are the primary source
       },
     });
   }
@@ -339,11 +437,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.estado = 'NORMAL';
       this.alertaTempMsg = '';
     }
-  }
-
-  /** Returns the timestamp from a reading, falling back to created_at if timestamp is absent */
-  getReadingTimestamp(r: Reading): string | null {
-    return r.timestamp || r.created_at || null;
   }
 
   logout() {
