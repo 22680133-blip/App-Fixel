@@ -341,6 +341,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     }
   }
 
+  /** Returns the timestamp from a reading, falling back to created_at if timestamp is absent */
+  getReadingTimestamp(r: Reading): string | null {
+    return r.timestamp || r.created_at || null;
+  }
+
   logout() {
     this.auth.logout();
   }
