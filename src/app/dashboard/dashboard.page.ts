@@ -2,10 +2,11 @@ import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewI
 import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
-import { ReadingsService, Reading } from '../services/readings.service';
+import { Reading } from '../services/readings.service';
+import { SensorService, SensorData } from '../services/sensor.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -56,10 +57,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   // User preference: alerts enabled/disabled (synced from configuration page)
   alertsEnabled = true;
 
-  // Tracks whether the device-specific endpoints returned data
-  private deviceEndpointHadData = false;
-  private deviceHistorialHadData = false;
-
   // Estado de carga y error
   isLoading = true;
   errorMsg = '';
@@ -73,14 +70,13 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   private pendingChartReadings: Lectura[] | null = null;
   private pendingChartFromReadings: Reading[] | null = null;
 
-  // RxJS subscriptions for polling
-  private pollingSub: Subscription | null = null;
+  // RxJS subscriptions for centralized sensor polling
+  private sensorSub: Subscription | null = null;
   private readingsSub: Subscription | null = null;
-  private readonly POLL_SECONDS = 5;
 
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
-  private readonly readingsService = inject(ReadingsService);
+  private readonly sensorService = inject(SensorService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -157,10 +153,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.errorMsg = '';
     this.sinDatos = false;
 
-    // Reset data flags for fresh load
-    this.deviceEndpointHadData = false;
-    this.deviceHistorialHadData = false;
-
     // Destroy stale chart (canvas is about to be removed by *ngIf)
     if (this.chart) {
       this.chart.destroy();
@@ -209,18 +201,15 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.deviceService.getUltimaLectura(deviceId).subscribe({
       next: (res) => {
         this.isLoading = false;
-        if (!res.reading) {
-          this.deviceEndpointHadData = false;
+        if (res.reading) {
+          this.applyLectura(res.reading);
+        } else {
           this.cdr.detectChanges();
           this.flushPendingChart();
-          return;
         }
-        this.deviceEndpointHadData = true;
-        this.applyLectura(res.reading);
       },
       error: () => {
         this.isLoading = false;
-        this.deviceEndpointHadData = false;
         this.cdr.detectChanges();
         this.flushPendingChart();
       },
@@ -259,12 +248,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.flushPendingChart();
   }
 
-  /** Applies a Reading (from /api/readings fallback) to the dashboard state */
-  private applyReading(reading: Reading) {
-    const readingTimestamp = reading.timestamp || reading.created_at;
-    this.temperaturaNum = reading.temperatura;
-    this.temperatura = reading.temperatura.toFixed(1);
-    this.humedadActual = reading.humedad ?? null;
+  /** Applies centralized SensorData (from SensorService) to the dashboard state */
+  private applySensorData(data: SensorData) {
+    this.temperaturaNum = data.temperatura;
+    this.temperatura = data.temperatura.toFixed(1);
+    this.humedadActual = data.humedad;
     this.energia = 'Normal';
 
     // Compressor logic: ON if temp > max, OFF if within range
@@ -274,10 +262,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.compresor = 'Apagado';
     }
 
-    this.ultimaActualizacion = this.formatTimestamp(readingTimestamp);
+    this.ultimaActualizacion = this.formatTimestamp(data.timestamp);
 
     // Connection status based on timestamp
-    const secondsAgo = this.getSecondsAgo(readingTimestamp);
+    const secondsAgo = this.getSecondsAgo(data.timestamp);
     if (secondsAgo <= 10) {
       this.deviceStatus = 'activo';
     } else {
@@ -314,15 +302,12 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.deviceService.getHistorial(deviceId).subscribe({
       next: (res) => {
         if (res.readings && res.readings.length > 0) {
-          this.deviceHistorialHadData = true;
           this.updateMinMaxFromTemps(res.readings.map((r) => r.temperatura));
           this.renderChart(res.readings);
-        } else {
-          this.deviceHistorialHadData = false;
         }
       },
       error: () => {
-        this.deviceHistorialHadData = false;
+        // Initial history load failed; SensorService will provide chart data
       },
     });
   }
@@ -440,9 +425,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   /** Stop all polling subscriptions */
   private stopPolling() {
-    if (this.pollingSub) {
-      this.pollingSub.unsubscribe();
-      this.pollingSub = null;
+    this.sensorService.stopPolling();
+    if (this.sensorSub) {
+      this.sensorSub.unsubscribe();
+      this.sensorSub = null;
     }
     if (this.readingsSub) {
       this.readingsSub.unsubscribe();
@@ -453,55 +439,22 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   private startPolling() {
     this.stopPolling();
 
-    // Poll device-specific endpoints every POLL_SECONDS
-    this.pollingSub = interval(this.POLL_SECONDS * 1000).subscribe(() => {
-      if (this.dispositivo) {
-        this.cargarUltimaLectura(this.dispositivo.id);
-        this.cargarHistorial(this.dispositivo.id);
-      }
-    });
+    // Start centralized sensor polling
+    this.sensorService.startPolling(this.deviceId);
 
-    // Poll /api/readings using the RxJS-based realtime observable (error-resilient)
-    this.readingsSub = this.readingsService.getRealtimeData().subscribe((data) => {
-      this.processReadings(data);
-    });
-  }
-
-  /**
-   * Process readings from the /api/readings endpoint.
-   * When the device-specific endpoints returned no data, this serves as a
-   * fallback to populate the main dashboard with real ESP32 data.
-   */
-  private processReadings(data: Reading[]) {
-    if (!data || data.length === 0) return;
-
-    // Filter readings for the active device (match by device_code / deviceId)
-    const deviceReadings = this.deviceId
-      ? data.filter((r) => r.device_code === this.deviceId)
-      : data;
-
-    // Use all received readings if no device match found
-    const relevantReadings = deviceReadings.length > 0 ? deviceReadings : data;
-
-    // Sort by timestamp ascending for chart rendering
-    const sorted = [...relevantReadings].sort((a, b) => {
-      const tsA = new Date(a.timestamp || a.created_at || 0).getTime();
-      const tsB = new Date(b.timestamp || b.created_at || 0).getTime();
-      return tsA - tsB;
-    });
-
-    // Fallback: populate main dashboard if device-specific endpoint had no data
-    if (!this.deviceEndpointHadData && sorted.length > 0) {
+    // Subscribe to latest sensor data for ALL dashboard elements
+    this.sensorSub = this.sensorService.latestData$.subscribe(data => {
+      if (!data) return;
       this.isLoading = false;
-      const latest = sorted[sorted.length - 1];
-      this.applyReading(latest);
-    }
+      this.applySensorData(data);
+    });
 
-    // Fallback: populate min/max and chart if device history had no data
-    if (!this.deviceHistorialHadData && sorted.length > 0) {
-      this.updateMinMaxFromTemps(sorted.map((r) => r.temperatura));
-      this.renderChartFromReadings(sorted);
-    }
+    // Subscribe to all readings for chart + min/max
+    this.readingsSub = this.sensorService.readings$.subscribe(readings => {
+      if (readings.length === 0) return;
+      this.updateMinMaxFromTemps(readings.map(r => r.temperatura));
+      this.renderChartFromReadings(readings);
+    });
   }
 
   private evaluarAlerta() {
