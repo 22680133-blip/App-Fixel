@@ -19,6 +19,8 @@ Chart.register(...registerables);
   imports: [IonContent, CommonModule],
 })
 export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter, ViewWillLeave {
+  /** Seconds within which a reading is considered fresh (device "activo") */
+  private static readonly CONNECTION_TIMEOUT_SECONDS = 60;
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Datos del usuario
@@ -74,6 +76,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   private sensorSub: Subscription | null = null;
   private readingsSub: Subscription | null = null;
 
+  // Stored readings for re-rendering chart on unit toggle
+  private lastChartLecturas: Lectura[] | null = null;
+  private lastChartReadings: Reading[] | null = null;
+
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly sensorService = inject(SensorService);
@@ -113,7 +119,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.alertsEnabled = savedAlerts === null || savedAlerts !== 'false';
 
     this.cargarDatos();
-    this.startPolling();
   }
 
   /** Ionic lifecycle: fires when leaving the page — stop polling */
@@ -129,6 +134,12 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   toggleUnit() {
     this.unit = this.unit === 'C' ? 'F' : 'C';
     localStorage.setItem('tempUnit', this.unit);
+    // Re-render chart in the new unit
+    if (this.lastChartReadings) {
+      this.renderChartFromReadings(this.lastChartReadings);
+    } else if (this.lastChartLecturas) {
+      this.renderChart(this.lastChartLecturas);
+    }
   }
 
   /** Convierte Celsius a Fahrenheit */
@@ -187,6 +198,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         // Cargar lectura y historial
         this.cargarUltimaLectura(this.dispositivo.id);
         this.cargarHistorial(this.dispositivo.id);
+
+        // Start real-time polling now that deviceId is available
+        this.startPolling();
       },
       error: (err) => {
         this.isLoading = false;
@@ -233,11 +247,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
     this.ultimaActualizacion = this.formatTimestamp(readingTimestamp);
 
-    // Connection status based on timestamp
+    // Connection status based on timestamp (60-second threshold)
     const secondsAgo = this.getSecondsAgo(readingTimestamp);
     if ((lectura.energia || 'Normal') === 'Falla') {
       this.deviceStatus = 'alerta';
-    } else if (secondsAgo <= 10) {
+    } else if (secondsAgo <= DashboardPage.CONNECTION_TIMEOUT_SECONDS) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
@@ -266,7 +280,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
     // Connection status based on timestamp
     const secondsAgo = this.getSecondsAgo(data.timestamp);
-    if (secondsAgo <= 10) {
+    if (secondsAgo <= DashboardPage.CONNECTION_TIMEOUT_SECONDS) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
@@ -322,6 +336,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   }
 
   private renderChart(readings: Lectura[]) {
+    this.lastChartLecturas = readings;
+    this.lastChartReadings = null;
     if (!this.chartCanvas?.nativeElement) {
       this.pendingChartReadings = readings;
       return;
@@ -343,6 +359,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   /** Renders chart from Reading[] (fallback from /api/readings) */
   private renderChartFromReadings(readings: Reading[]) {
+    this.lastChartReadings = readings;
+    this.lastChartLecturas = null;
     if (!this.chartCanvas?.nativeElement) {
       this.pendingChartFromReadings = readings;
       return;
@@ -350,7 +368,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.pendingChartFromReadings = null;
 
     const labels = readings.map((r) => {
-      const ts = r.timestamp || r.created_at;
+      const ts = r.timestamp || r.created_at || r.fecha;
       const d = ts ? new Date(ts) : new Date();
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     });
