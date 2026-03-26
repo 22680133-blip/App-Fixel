@@ -53,6 +53,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   fueraDeRango = false;
   alertaTempMsg = '';
 
+  // User preference: alerts enabled/disabled (synced from configuration page)
+  alertsEnabled = true;
+
   // Tracks whether the device-specific endpoints returned data
   private deviceEndpointHadData = false;
   private deviceHistorialHadData = false;
@@ -109,6 +112,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
+    // Reload alerts preference
+    const savedAlerts = localStorage.getItem('alertsEnabled');
+    this.alertsEnabled = savedAlerts !== 'false';
+
     this.cargarDatos();
     this.startPolling();
   }

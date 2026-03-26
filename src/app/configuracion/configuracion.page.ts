@@ -51,6 +51,11 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
+    // Load saved alerts preference
+    const savedAlerts = localStorage.getItem('alertsEnabled');
+    if (savedAlerts !== null) {
+      this.alerts = savedAlerts !== 'false';
+    }
     this.cargarConfiguracion();
   }
 
@@ -88,6 +93,22 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     localStorage.setItem('tempUnit', u);
   }
 
+  onAlertsToggle() {
+    localStorage.setItem('alertsEnabled', String(this.alerts));
+  }
+
+  /** Returns display temperature in the current unit */
+  getDisplayTemp(celsius: number): string {
+    if (this.unit === 'F') {
+      return ((celsius * 9) / 5 + 32).toFixed(1);
+    }
+    return celsius.toString();
+  }
+
+  get unitSymbol(): string {
+    return this.unit === 'F' ? '°F' : '°C';
+  }
+
   guardar() {
     if (!this.dispositivoId) {
       this.errorMsg = 'No hay dispositivo registrado. Agrega uno primero.';
@@ -108,6 +129,9 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.guardado = false;
     this.errorMsg = '';
+
+    // Persist alerts preference
+    localStorage.setItem('alertsEnabled', String(this.alerts));
 
     this.deviceService
       .guardarConfiguracion(this.dispositivoId, {

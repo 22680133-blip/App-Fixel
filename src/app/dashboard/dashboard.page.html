@@ -65,7 +65,7 @@
 
 
   <!-- ALERTA DISPOSITIVO DESCONECTADO -->
-  <div class="alert-card alert-disconnected" *ngIf="deviceStatus === 'desconectado' && !isLoading && !sinDatos">
+  <div class="alert-card alert-disconnected" *ngIf="alertsEnabled && deviceStatus === 'desconectado' && !isLoading && !sinDatos">
     <div class="alert-icon-temp">🔌</div>
     <div>
       <h4>Dispositivo Desconectado</h4>
@@ -75,7 +75,7 @@
 
 
   <!-- ALERTA ENERGÍA -->
-  <div class="alert-card" *ngIf="energia === 'Falla'">
+  <div class="alert-card" *ngIf="alertsEnabled && energia === 'Falla'">
 
     <img src="assets/img/alert.png">
 
@@ -88,7 +88,7 @@
 
 
   <!-- ALERTA TEMPERATURA FUERA DE RANGO -->
-  <div class="alert-card alert-temp" *ngIf="fueraDeRango">
+  <div class="alert-card alert-temp" *ngIf="alertsEnabled && fueraDeRango">
 
     <div class="alert-icon-temp">🌡️</div>
 

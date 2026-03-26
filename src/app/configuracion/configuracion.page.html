@@ -38,7 +38,7 @@
 <label>Temperatura Mínima</label>
 
 <div class="temp-row">
-<span>{{minTemp}}°C</span>
+<span>{{getDisplayTemp(minTemp)}}{{unitSymbol}}</span>
 </div>
 
 <input
@@ -51,7 +51,7 @@ max="10"
 <label>Temperatura Máxima</label>
 
 <div class="temp-row">
-<span class="max">{{maxTemp}}°C</span>
+<span class="max">{{getDisplayTemp(maxTemp)}}{{unitSymbol}}</span>
 </div>
 
 <input
@@ -87,7 +87,7 @@ max="15"
 
 <label class="switch">
 
-<input type="checkbox" [(ngModel)]="alerts">
+<input type="checkbox" [(ngModel)]="alerts" (ngModelChange)="onAlertsToggle()">
 
 <span class="slider"></span>
 

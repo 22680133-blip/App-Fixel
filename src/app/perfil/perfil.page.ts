@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular/standalone';
+import { Subscription, interval, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService, Usuario } from '../services/auth.service';
 import { DeviceService, Dispositivo } from '../services/device.service';
 
@@ -17,7 +19,7 @@ import { DeviceService, Dispositivo } from '../services/device.service';
     FormsModule,
   ],
 })
-export class PerfilPage implements OnInit {
+export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLeave {
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly router = inject(Router);
@@ -60,13 +62,44 @@ export class PerfilPage implements OnInit {
   eliminandoDispositivo = false;
   errorEliminar = '';
 
+  // Polling
+  private pollingSub: Subscription | null = null;
+  private readonly POLL_SECONDS = 10;
+
   ngOnInit() {
     if (this.usuario) {
       this.editNombre = this.usuario.nombre || '';
       this.editTelefono = this.usuario.telefono || '';
       this.editUbicacion = this.usuario.ubicacion || '';
-      this.cargarDispositivos();
       this.cargarPerfilFresco();
+    }
+  }
+
+  ionViewWillEnter() {
+    this.usuario = this.auth.getUsuario();
+    this.cargarDispositivos();
+    this.startPolling();
+  }
+
+  ionViewWillLeave() {
+    this.stopPolling();
+  }
+
+  ngOnDestroy() {
+    this.stopPolling();
+  }
+
+  private startPolling() {
+    this.stopPolling();
+    this.pollingSub = interval(this.POLL_SECONDS * 1000).subscribe(() => {
+      this.cargarDispositivos();
+    });
+  }
+
+  private stopPolling() {
+    if (this.pollingSub) {
+      this.pollingSub.unsubscribe();
+      this.pollingSub = null;
     }
   }
 
@@ -90,7 +123,34 @@ export class PerfilPage implements OnInit {
       next: (res) => {
         this.dispositivos = res.devices || [];
         this.totalDispositivos = this.dispositivos.length;
-        this.activos = this.dispositivos.filter((d) => d.status === 'activo').length;
+
+        // Compute active count by checking latest reading timestamp per device
+        if (this.dispositivos.length === 0) {
+          this.activos = 0;
+          return;
+        }
+
+        const readingChecks = this.dispositivos.map((d) =>
+          this.deviceService.getUltimaLectura(d.id).pipe(
+            catchError(() => of({ reading: null }))
+          )
+        );
+
+        forkJoin(readingChecks).subscribe((results) => {
+          let activeCount = 0;
+          for (const r of results) {
+            if (r.reading) {
+              const ts = r.reading.timestamp || (r.reading as any).created_at;
+              if (ts) {
+                const secondsAgo = (Date.now() - new Date(ts).getTime()) / 1000;
+                if (secondsAgo <= 30) {
+                  activeCount++;
+                }
+              }
+            }
+          }
+          this.activos = activeCount;
+        });
       },
       error: () => {
         this.dispositivos = [];
