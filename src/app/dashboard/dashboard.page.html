@@ -167,7 +167,7 @@
       <div class="reading-card" *ngFor="let r of readings">
         <div class="reading-header">
           <span class="reading-device">{{r.device_code}}</span>
-          <span class="reading-timestamp">{{r.timestamp | date:'short'}}</span>
+          <span class="reading-timestamp">{{getReadingTimestamp(r) ? (getReadingTimestamp(r) | date:'short') : '--'}}</span>
         </div>
         <div class="reading-body">
           <div class="reading-item">

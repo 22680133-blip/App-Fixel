@@ -7,7 +7,9 @@ export interface Reading {
   device_code: string;
   temperatura: number;
   humedad: number;
-  timestamp: string;
+  /** Backend may return either timestamp or created_at */
+  timestamp?: string;
+  created_at?: string;
 }
 
 @Injectable({ providedIn: 'root' })
