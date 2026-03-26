@@ -199,7 +199,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     const readingTimestamp = lectura.timestamp || (lectura as any).created_at;
     this.temperaturaNum = lectura.temperatura;
     this.temperatura = lectura.temperatura.toFixed(1);
-    this.humedadActual = lectura.humedad;
+    this.humedadActual = lectura.humedad ?? null;
     this.energia = lectura.energia || 'Normal';
 
     // Compressor logic: ON if temp > max, OFF if within range
@@ -230,7 +230,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     const readingTimestamp = reading.timestamp || reading.created_at;
     this.temperaturaNum = reading.temperatura;
     this.temperatura = reading.temperatura.toFixed(1);
-    this.humedadActual = reading.humedad;
+    this.humedadActual = reading.humedad ?? null;
     this.energia = 'Normal';
 
     // Compressor logic: ON if temp > max, OFF if within range
