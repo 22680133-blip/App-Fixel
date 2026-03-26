@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { IonContent, ViewWillEnter } from '@ionic/angular/standalone';
+import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subscription, interval, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
 import { ReadingsService, Reading } from '../services/readings.service';
@@ -16,7 +18,7 @@ Chart.register(...registerables);
   standalone: true,
   imports: [IonContent, CommonModule],
 })
-export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter {
+export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter, ViewWillLeave {
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Datos del usuario
@@ -36,7 +38,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   humedadActual: number | null = null;
   energia = 'Normal';
   compresor = 'Apagado';
-  ultimaActualizacion = '--:--';
+  ultimaActualizacion = '---';
 
   // Unidad de temperatura (°C / °F)
   unit: 'C' | 'F' = 'C';
@@ -64,14 +66,16 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   // Chart.js
   private chart: Chart | null = null;
 
-  // Polling
-  private pollingInterval: ReturnType<typeof setInterval> | null = null;
+  // RxJS subscriptions for polling
+  private pollingSub: Subscription | null = null;
+  private readingsSub: Subscription | null = null;
   private readonly POLL_SECONDS = 5;
 
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly readingsService = inject(ReadingsService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     const usuario = this.auth.getUsuario();
@@ -102,12 +106,16 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.unit = savedUnit;
     }
     this.cargarDatos();
-    this.cargarReadings();
     this.startPolling();
   }
 
+  /** Ionic lifecycle: fires when leaving the page — stop polling */
+  ionViewWillLeave() {
+    this.stopPolling();
+  }
+
   ngOnDestroy() {
-    if (this.pollingInterval) clearInterval(this.pollingInterval);
+    this.stopPolling();
     if (this.chart) this.chart.destroy();
   }
 
@@ -180,8 +188,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         this.isLoading = false;
         if (!res.reading) {
           this.deviceEndpointHadData = false;
-          this.sinDatos = false;
-          this.deviceStatus = 'desconectado';
           return;
         }
         this.deviceEndpointHadData = true;
@@ -209,20 +215,20 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.compresor = 'Apagado';
     }
 
-    const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
-    this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+    this.ultimaActualizacion = this.formatTimestamp(readingTimestamp);
 
-    // Connection status based on timestamp (connected if last reading < 60 seconds ago)
-    const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
+    // Connection status based on timestamp
+    const secondsAgo = this.getSecondsAgo(readingTimestamp);
     if ((lectura.energia || 'Normal') === 'Falla') {
       this.deviceStatus = 'alerta';
-    } else if (secondsAgo <= 60) {
+    } else if (secondsAgo <= 10) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
     }
 
     this.evaluarAlerta();
+    this.cdr.detectChanges();
   }
 
   /** Applies a Reading (from /api/readings fallback) to the dashboard state */
@@ -240,18 +246,39 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.compresor = 'Apagado';
     }
 
-    const fecha = readingTimestamp ? new Date(readingTimestamp) : new Date();
-    this.ultimaActualizacion = `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
+    this.ultimaActualizacion = this.formatTimestamp(readingTimestamp);
 
-    // Connection status based on timestamp (connected if last reading < 60 seconds ago)
-    const secondsAgo = (Date.now() - fecha.getTime()) / 1000;
-    if (secondsAgo <= 60) {
+    // Connection status based on timestamp
+    const secondsAgo = this.getSecondsAgo(readingTimestamp);
+    if (secondsAgo <= 10) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
     }
 
     this.evaluarAlerta();
+    this.cdr.detectChanges();
+  }
+
+  /** Formats a timestamp string into a readable date/time */
+  private formatTimestamp(ts: string | undefined | null): string {
+    if (!ts) return '---';
+    const fecha = new Date(ts);
+    if (isNaN(fecha.getTime())) return '---';
+    const dd = String(fecha.getDate()).padStart(2, '0');
+    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+    const hh = String(fecha.getHours()).padStart(2, '0');
+    const min = String(fecha.getMinutes()).padStart(2, '0');
+    const ss = String(fecha.getSeconds()).padStart(2, '0');
+    return `${dd}/${mm} ${hh}:${min}:${ss}`;
+  }
+
+  /** Returns seconds elapsed since the given timestamp, or Infinity if invalid */
+  private getSecondsAgo(ts: string | undefined | null): number {
+    if (!ts) return Infinity;
+    const fecha = new Date(ts);
+    if (isNaN(fecha.getTime())) return Infinity;
+    return (Date.now() - fecha.getTime()) / 1000;
   }
 
   private cargarHistorial(deviceId: number) {
@@ -315,13 +342,14 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   /** Creates or updates the Chart.js instance */
   private updateChart(labels: string[], temps: number[]) {
-    if (!this.chartCanvas) return;
+    if (!this.chartCanvas?.nativeElement) return;
+    if (labels.length === 0 || temps.length === 0) return;
 
     if (this.chart) {
       this.chart.data.labels = labels;
       this.chart.data.datasets[0].data = temps;
       this.chart.data.datasets[0].label = `Temperatura (${this.unitSymbol})`;
-      this.chart.update();
+      this.chart.update('none');
       return;
     }
 
@@ -346,6 +374,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: {
           legend: { display: false },
         },
@@ -363,59 +392,75 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     });
   }
 
+  /** Stop all polling subscriptions */
+  private stopPolling() {
+    if (this.pollingSub) {
+      this.pollingSub.unsubscribe();
+      this.pollingSub = null;
+    }
+    if (this.readingsSub) {
+      this.readingsSub.unsubscribe();
+      this.readingsSub = null;
+    }
+  }
+
   private startPolling() {
-    if (this.pollingInterval) clearInterval(this.pollingInterval);
-    this.pollingInterval = setInterval(() => {
-      if (this.dispositivo) {
+    this.stopPolling();
+
+    // Poll device-specific endpoints every POLL_SECONDS
+    this.pollingSub = interval(this.POLL_SECONDS * 1000).pipe(
+      switchMap(() => {
+        if (!this.dispositivo) return of(null);
         this.cargarUltimaLectura(this.dispositivo.id);
         this.cargarHistorial(this.dispositivo.id);
-      }
-      this.cargarReadings();
-    }, this.POLL_SECONDS * 1000);
+        return of(null);
+      }),
+      catchError(() => of(null))
+    ).subscribe();
+
+    // Poll /api/readings using the RxJS-based realtime observable
+    this.readingsSub = this.readingsService.getRealtimeData().pipe(
+      catchError(() => of([] as Reading[]))
+    ).subscribe((data) => {
+      this.processReadings(data);
+    });
   }
 
   /**
-   * Fetch readings from the /api/readings endpoint.
+   * Process readings from the /api/readings endpoint.
    * When the device-specific endpoints returned no data, this serves as a
    * fallback to populate the main dashboard with real ESP32 data.
    */
-  private cargarReadings() {
-    this.readingsService.getReadings().subscribe({
-      next: (data) => {
-        if (!data || data.length === 0) return;
+  private processReadings(data: Reading[]) {
+    if (!data || data.length === 0) return;
 
-        // Filter readings for the active device (match by device_code / deviceId)
-        const deviceReadings = this.deviceId
-          ? data.filter((r) => r.device_code === this.deviceId)
-          : data;
+    // Filter readings for the active device (match by device_code / deviceId)
+    const deviceReadings = this.deviceId
+      ? data.filter((r) => r.device_code === this.deviceId)
+      : data;
 
-        // Use all received readings if no device match found
-        const relevantReadings = deviceReadings.length > 0 ? deviceReadings : data;
+    // Use all received readings if no device match found
+    const relevantReadings = deviceReadings.length > 0 ? deviceReadings : data;
 
-        // Sort by timestamp ascending for chart rendering
-        const sorted = [...relevantReadings].sort((a, b) => {
-          const tsA = new Date(a.timestamp || a.created_at || 0).getTime();
-          const tsB = new Date(b.timestamp || b.created_at || 0).getTime();
-          return tsA - tsB;
-        });
-
-        // Fallback: populate main dashboard if device-specific endpoint had no data
-        if (!this.deviceEndpointHadData && sorted.length > 0) {
-          this.isLoading = false;
-          const latest = sorted[sorted.length - 1];
-          this.applyReading(latest);
-        }
-
-        // Fallback: populate min/max and chart if device history had no data
-        if (!this.deviceHistorialHadData && sorted.length > 0) {
-          this.updateMinMaxFromTemps(sorted.map((r) => r.temperatura));
-          this.renderChartFromReadings(sorted);
-        }
-      },
-      error: () => {
-        // Silently handle – device-specific endpoints are the primary source
-      },
+    // Sort by timestamp ascending for chart rendering
+    const sorted = [...relevantReadings].sort((a, b) => {
+      const tsA = new Date(a.timestamp || a.created_at || 0).getTime();
+      const tsB = new Date(b.timestamp || b.created_at || 0).getTime();
+      return tsA - tsB;
     });
+
+    // Fallback: populate main dashboard if device-specific endpoint had no data
+    if (!this.deviceEndpointHadData && sorted.length > 0) {
+      this.isLoading = false;
+      const latest = sorted[sorted.length - 1];
+      this.applyReading(latest);
+    }
+
+    // Fallback: populate min/max and chart if device history had no data
+    if (!this.deviceHistorialHadData && sorted.length > 0) {
+      this.updateMinMaxFromTemps(sorted.map((r) => r.temperatura));
+      this.renderChartFromReadings(sorted);
+    }
   }
 
   private evaluarAlerta() {
