@@ -567,6 +567,79 @@
   width: 100%;
 }
 
+/* READINGS SECTION */
+.readings-section {
+  margin-bottom: 20px;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.readings-title {
+  color: #00e5ff;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.readings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reading-card {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
+  border: 2px solid rgba(0, 229, 255, 0.2);
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.reading-card:hover {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.08));
+  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.15);
+}
+
+.reading-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reading-device {
+  color: #00e5ff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reading-timestamp {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.reading-body {
+  display: flex;
+  justify-content: space-around;
+}
+
+.reading-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.reading-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+.reading-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
 /* ANIMATIONS */
 @keyframes fadeIn {
   from {

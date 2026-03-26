@@ -152,6 +152,38 @@
   </div>
 
 
+  <!-- LECTURAS DEL SENSOR (endpoint /api/readings) -->
+  <div class="alert-card" *ngIf="readingsError">
+    <div class="alert-icon-temp">⚠️</div>
+    <div>
+      <h4>Error de Lecturas</h4>
+      <p>{{readingsError}}</p>
+    </div>
+  </div>
+
+  <div class="readings-section" *ngIf="readings.length > 0">
+    <h3 class="readings-title">📡 Lecturas del Sensor</h3>
+    <div class="readings-list">
+      <div class="reading-card" *ngFor="let r of readings">
+        <div class="reading-header">
+          <span class="reading-device">{{r.device_code}}</span>
+          <span class="reading-timestamp">{{r.timestamp | date:'short'}}</span>
+        </div>
+        <div class="reading-body">
+          <div class="reading-item">
+            <span class="reading-label">🌡️ Temperatura</span>
+            <span class="reading-value">{{r.temperatura}} °C</span>
+          </div>
+          <div class="reading-item">
+            <span class="reading-label">💧 Humedad</span>
+            <span class="reading-value">{{r.humedad}} %</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ESTADOS -->
   <div class="status-grid" *ngIf="!isLoading && !sinDatos">
 

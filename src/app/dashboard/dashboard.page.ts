@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
+import { ReadingsService, Reading } from '../services/readings.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -50,6 +51,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   fueraDeRango = false;
   alertaTempMsg = '';
 
+  // Lecturas del endpoint /api/readings
+  readings: Reading[] = [];
+  readingsError = '';
+
   // Estado de carga y error
   isLoading = true;
   errorMsg = '';
@@ -60,10 +65,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   // Polling
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
-  private readonly POLL_SECONDS = 15;
+  private readonly POLL_SECONDS = 5;
 
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
+  private readonly readingsService = inject(ReadingsService);
   private readonly router = inject(Router);
 
   ngOnInit() {
@@ -95,6 +101,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.unit = savedUnit;
     }
     this.cargarDatos();
+    this.cargarReadings();
+    this.startPolling();
   }
 
   ngOnDestroy() {
@@ -155,9 +163,6 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         // Cargar lectura y historial
         this.cargarUltimaLectura(this.dispositivo.id);
         this.cargarHistorial(this.dispositivo.id);
-
-        // Iniciar polling
-        this.startPolling();
       },
       error: (err) => {
         this.isLoading = false;
@@ -296,7 +301,23 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         this.cargarUltimaLectura(this.dispositivo.id);
         this.cargarHistorial(this.dispositivo.id);
       }
+      this.cargarReadings();
     }, this.POLL_SECONDS * 1000);
+  }
+
+  /** Cargar lecturas desde el endpoint /api/readings */
+  private cargarReadings() {
+    this.readingsService.getReadings().subscribe({
+      next: (data) => {
+        console.log('Datos recibidos:', data);
+        this.readings = data;
+        this.readingsError = '';
+      },
+      error: (err) => {
+        console.error('Error al obtener lecturas:', err);
+        this.readingsError = 'No se pudieron cargar las lecturas del sensor.';
+      },
+    });
   }
 
   private evaluarAlerta() {
