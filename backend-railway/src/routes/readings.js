@@ -3,7 +3,10 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const readingController = require('../controllers/reading.controller');
 
-// Todas las rutas de lecturas requieren autenticación
+// Public endpoint — no auth required
+router.get('/', readingController.getReadings);
+
+// Auth-protected endpoints for device-specific queries
 router.use(auth);
 
 router.get('/latest/:deviceId', readingController.getLatest);
