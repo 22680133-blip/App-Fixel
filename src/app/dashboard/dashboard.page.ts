@@ -2,8 +2,7 @@ import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewI
 import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription, interval, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { Subscription, interval } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
 import { ReadingsService, Reading } from '../services/readings.service';
@@ -349,7 +348,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.chart.data.labels = labels;
       this.chart.data.datasets[0].data = temps;
       this.chart.data.datasets[0].label = `Temperatura (${this.unitSymbol})`;
-      this.chart.update('none');
+      this.chart.update('none'); // Skip animation for real-time updates
       return;
     }
 
@@ -408,20 +407,15 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.stopPolling();
 
     // Poll device-specific endpoints every POLL_SECONDS
-    this.pollingSub = interval(this.POLL_SECONDS * 1000).pipe(
-      switchMap(() => {
-        if (!this.dispositivo) return of(null);
+    this.pollingSub = interval(this.POLL_SECONDS * 1000).subscribe(() => {
+      if (this.dispositivo) {
         this.cargarUltimaLectura(this.dispositivo.id);
         this.cargarHistorial(this.dispositivo.id);
-        return of(null);
-      }),
-      catchError(() => of(null))
-    ).subscribe();
+      }
+    });
 
-    // Poll /api/readings using the RxJS-based realtime observable
-    this.readingsSub = this.readingsService.getRealtimeData().pipe(
-      catchError(() => of([] as Reading[]))
-    ).subscribe((data) => {
+    // Poll /api/readings using the RxJS-based realtime observable (error-resilient)
+    this.readingsSub = this.readingsService.getRealtimeData().subscribe((data) => {
       this.processReadings(data);
     });
   }

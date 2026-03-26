@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, interval } from 'rxjs';
-import { startWith, switchMap } from 'rxjs/operators';
+import { Observable, interval, of } from 'rxjs';
+import { startWith, switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface Reading {
@@ -27,7 +27,9 @@ export class ReadingsService {
   getRealtimeData(): Observable<Reading[]> {
     return interval(5000).pipe(
       startWith(0),
-      switchMap(() => this.getReadings())
+      switchMap(() => this.getReadings().pipe(
+        catchError(() => of([] as Reading[]))
+      ))
     );
   }
 }
