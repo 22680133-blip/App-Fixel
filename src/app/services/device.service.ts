@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -132,17 +133,40 @@ export class DeviceService {
 
   /** Última lectura de temperatura del ESP32 */
   getUltimaLectura(deviceId: number): Observable<{ reading: Lectura | null }> {
-    return this.http.get<{ reading: Lectura | null }>(
-      `${this.API}/readings/latest/${deviceId}`,
-      { headers: this.headers }
+    return this.http.get<{ readings: any[] }>(
+      `${this.API}/devices/${deviceId}/readings`,
+      { headers: this.headers, params: { limit: '1' } }
+    ).pipe(
+      map(res => ({
+        reading: res.readings && res.readings.length > 0
+          ? this.mapRowToLectura(res.readings[0])
+          : null
+      }))
     );
   }
 
   /** Historial de lecturas de las últimas 24 horas */
   getHistorial(deviceId: number): Observable<{ readings: Lectura[] }> {
-    return this.http.get<{ readings: Lectura[] }>(
-      `${this.API}/readings/history/${deviceId}`,
-      { headers: this.headers }
+    return this.http.get<{ readings: any[] }>(
+      `${this.API}/devices/${deviceId}/readings`,
+      { headers: this.headers, params: { limit: '100' } }
+    ).pipe(
+      map(res => ({
+        readings: (res.readings || [])
+          .map((r: any) => this.mapRowToLectura(r))
+          .reverse()  // DB returns DESC order, chart needs ASC
+      }))
     );
+  }
+
+  /** Maps a raw DB row (which may use fecha/created_at/timestamp) to Lectura */
+  private mapRowToLectura(row: any): Lectura {
+    return {
+      temperatura: parseFloat(row.temperatura),
+      humedad: row.humedad != null ? parseFloat(row.humedad) : null,
+      compresor: row.compresor ?? true,
+      energia: row.energia || 'Normal',
+      timestamp: row.timestamp || row.fecha || row.created_at,
+    };
   }
 }

@@ -195,6 +195,43 @@ exports.deleteDevice = async (req, res) => {
 };
 
 // ============================================================
+// GET /api/devices/:id/readings — Lecturas de un dispositivo
+// ============================================================
+exports.getDeviceReadings = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    const parsed = parseInt(req.query.limit, 10);
+    const limit = Math.min(Math.max(parsed > 0 ? parsed : 50, 1), 500);
+
+    // Verificar que el dispositivo pertenece al usuario
+    const check = await pool.query(
+      'SELECT id FROM devices WHERE id = $1 AND user_id = $2',
+      [req.params.id, userId]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
+    }
+
+    const deviceId = check.rows[0].id;
+
+    const result = await pool.query(
+      `SELECT id, temperatura, humedad, timestamp
+       FROM readings
+       WHERE device_id = $1
+       ORDER BY timestamp DESC
+       LIMIT $2`,
+      [deviceId, limit]
+    );
+
+    res.json({ readings: result.rows });
+  } catch (error) {
+    console.error('Error al obtener lecturas del dispositivo:', error);
+    res.status(500).json({ mensaje: 'Error al obtener lecturas' });
+  }
+};
+
+// ============================================================
 // Aliases para compatibilidad con rutas existentes en backend-monitoreo
 // (las rutas desplegadas usan .create, .getAll, .getOne, .update, .remove)
 // ============================================================

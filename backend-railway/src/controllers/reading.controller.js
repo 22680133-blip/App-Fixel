@@ -22,6 +22,53 @@ function getUserId(req) {
 }
 
 // ============================================================
+// GET /api/readings — Últimas lecturas (público)
+// Soporta ?device_code=XXX&limit=50
+// ============================================================
+exports.getReadings = async (req, res) => {
+  try {
+    const { device_code } = req.query;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 500);
+
+    let query;
+    let params;
+
+    if (device_code) {
+      query = `
+        SELECT d.device_code,
+               r.temperatura,
+               r.humedad,
+               r.timestamp
+        FROM readings r
+        JOIN devices d ON d.id = r.device_id
+        WHERE d.device_code = $1 OR d.device_id = $1
+        ORDER BY r.timestamp DESC
+        LIMIT $2
+      `;
+      params = [device_code, limit];
+    } else {
+      query = `
+        SELECT d.device_code,
+               r.temperatura,
+               r.humedad,
+               r.timestamp
+        FROM readings r
+        JOIN devices d ON d.id = r.device_id
+        ORDER BY r.timestamp DESC
+        LIMIT $1
+      `;
+      params = [limit];
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error en GET /api/readings:', error);
+    res.status(500).json({ mensaje: 'Error al obtener lecturas' });
+  }
+};
+
+// ============================================================
 // GET /api/readings/latest/:deviceId
 // Última lectura de temperatura del dispositivo
 // ============================================================

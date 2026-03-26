@@ -7,6 +7,7 @@ const deviceController = require('../controllers/device.controller');
 router.use(auth);
 
 router.get('/', deviceController.getDevices);
+router.get('/:id/readings', deviceController.getDeviceReadings);
 router.get('/:id', deviceController.getDevice);
 router.post('/', deviceController.createDevice);
 router.put('/:id', deviceController.updateDevice);
