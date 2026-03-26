@@ -34,7 +34,7 @@ export class SensorService {
     this.stopPolling();
     this.activeDeviceCode = deviceCode;
 
-    this.pollingSub = this.readingsService.getRealtimeData().subscribe((data) => {
+    this.pollingSub = this.readingsService.getRealtimeData(deviceCode).subscribe((data) => {
       if (!data || data.length === 0) return;
 
       // Filter for active device
@@ -46,8 +46,8 @@ export class SensorService {
 
       // Sort ascending by timestamp
       const sorted = [...relevant].sort((a, b) => {
-        const tsA = new Date(a.timestamp || a.created_at || 0).getTime();
-        const tsB = new Date(b.timestamp || b.created_at || 0).getTime();
+        const tsA = new Date(a.timestamp || a.created_at || a.fecha || 0).getTime();
+        const tsB = new Date(b.timestamp || b.created_at || b.fecha || 0).getTime();
         return tsA - tsB;
       });
 
@@ -58,7 +58,7 @@ export class SensorService {
         this.sensorData$.next({
           temperatura: latest.temperatura,
           humedad: latest.humedad ?? null,
-          timestamp: latest.timestamp || latest.created_at || null,
+          timestamp: latest.timestamp || latest.created_at || latest.fecha || null,
           device_code: latest.device_code,
         });
       }
