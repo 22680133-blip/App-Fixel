@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, interval, of } from 'rxjs';
+import { startWith, switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface Reading {
@@ -20,5 +21,15 @@ export class ReadingsService {
   /** Obtener todas las lecturas del endpoint /api/readings */
   getReadings(): Observable<Reading[]> {
     return this.http.get<Reading[]>(`${this.API}/readings`);
+  }
+
+  /** Observable que emite lecturas cada 5 segundos (emite inmediatamente al suscribirse) */
+  getRealtimeData(): Observable<Reading[]> {
+    return interval(5000).pipe(
+      startWith(0),
+      switchMap(() => this.getReadings().pipe(
+        catchError(() => of([] as Reading[]))
+      ))
+    );
   }
 }
