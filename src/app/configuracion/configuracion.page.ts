@@ -102,7 +102,7 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     if (this.unit === 'F') {
       return ((celsius * 9) / 5 + 32).toFixed(1);
     }
-    return celsius.toString();
+    return celsius.toFixed(1);
   }
 
   get unitSymbol(): string {

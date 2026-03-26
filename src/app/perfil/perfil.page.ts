@@ -65,6 +65,7 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
   // Polling
   private pollingSub: Subscription | null = null;
   private readonly POLL_SECONDS = 10;
+  private static readonly ACTIVE_THRESHOLD_SECONDS = 30;
 
   ngOnInit() {
     if (this.usuario) {
@@ -143,7 +144,7 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
               const ts = r.reading.timestamp || (r.reading as any).created_at;
               if (ts) {
                 const secondsAgo = (Date.now() - new Date(ts).getTime()) / 1000;
-                if (secondsAgo <= 30) {
+                if (secondsAgo <= PerfilPage.ACTIVE_THRESHOLD_SECONDS) {
                   activeCount++;
                 }
               }

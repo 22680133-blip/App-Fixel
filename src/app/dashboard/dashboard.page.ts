@@ -112,9 +112,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
-    // Reload alerts preference
+    // Reload alerts preference (default to enabled if not set)
     const savedAlerts = localStorage.getItem('alertsEnabled');
-    this.alertsEnabled = savedAlerts !== 'false';
+    this.alertsEnabled = savedAlerts === null || savedAlerts !== 'false';
 
     this.cargarDatos();
     this.startPolling();
