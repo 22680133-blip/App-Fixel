@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { IonContent, ViewWillEnter, ViewWillLeave } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
 import { Reading } from '../services/readings.service';
 import { SensorService, SensorData } from '../services/sensor.service';
+import { AssistantService } from '../services/assistant.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -16,7 +18,7 @@ Chart.register(...registerables);
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule],
+  imports: [IonContent, CommonModule, FormsModule],
 })
 export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter, ViewWillLeave {
   /** Seconds within which a reading is considered fresh (device "activo") */
@@ -83,8 +85,14 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   private readonly auth = inject(AuthService);
   private readonly deviceService = inject(DeviceService);
   private readonly sensorService = inject(SensorService);
+  private readonly assistantService = inject(AssistantService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  // Chat del asistente IA
+  chatMessages: { role: 'user' | 'assistant'; text: string }[] = [];
+  chatInput = '';
+  chatLoading = false;
 
   ngOnInit() {
     const usuario = this.auth.getUsuario();
@@ -494,6 +502,26 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.estado = 'NORMAL';
       this.alertaTempMsg = '';
     }
+  }
+
+  sendChat() {
+    const pregunta = this.chatInput.trim();
+    if (!pregunta || this.chatLoading) return;
+
+    this.chatMessages.push({ role: 'user', text: pregunta });
+    this.chatInput = '';
+    this.chatLoading = true;
+
+    this.assistantService.ask(pregunta).subscribe({
+      next: (res) => {
+        this.chatMessages.push({ role: 'assistant', text: res.respuesta });
+        this.chatLoading = false;
+      },
+      error: () => {
+        this.chatMessages.push({ role: 'assistant', text: 'No se pudo obtener respuesta del asistente. Por favor, inténtalo de nuevo.' });
+        this.chatLoading = false;
+      },
+    });
   }
 
   logout() {
