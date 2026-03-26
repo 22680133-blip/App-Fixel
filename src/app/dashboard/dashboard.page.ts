@@ -19,6 +19,8 @@ Chart.register(...registerables);
   imports: [IonContent, CommonModule],
 })
 export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWillEnter, ViewWillLeave {
+  /** Seconds within which a reading is considered fresh (device "activo") */
+  private static readonly CONNECTION_TIMEOUT_SECONDS = 60;
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Datos del usuario
@@ -249,7 +251,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     const secondsAgo = this.getSecondsAgo(readingTimestamp);
     if ((lectura.energia || 'Normal') === 'Falla') {
       this.deviceStatus = 'alerta';
-    } else if (secondsAgo <= 60) {
+    } else if (secondsAgo <= DashboardPage.CONNECTION_TIMEOUT_SECONDS) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
@@ -276,9 +278,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
     this.ultimaActualizacion = this.formatTimestamp(data.timestamp);
 
-    // Connection status based on timestamp (60-second threshold)
+    // Connection status based on timestamp
     const secondsAgo = this.getSecondsAgo(data.timestamp);
-    if (secondsAgo <= 60) {
+    if (secondsAgo <= DashboardPage.CONNECTION_TIMEOUT_SECONDS) {
       this.deviceStatus = 'activo';
     } else {
       this.deviceStatus = 'desconectado';
