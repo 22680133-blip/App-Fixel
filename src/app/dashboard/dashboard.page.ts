@@ -65,7 +65,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   // Chart.js
   private chart: Chart | null = null;
 
-  // Pending chart data (stored when canvas is unavailable due to *ngIf)
+  // Pending chart data (stored when canvas is unavailable due to *ngIf hiding it;
+  // cleared after successful render in renderChart/renderChartFromReadings, or on data reload)
   private pendingChartReadings: Lectura[] | null = null;
   private pendingChartFromReadings: Reading[] | null = null;
 
