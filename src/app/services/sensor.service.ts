@@ -38,11 +38,11 @@ export class SensorService {
       if (!data || data.length === 0) return;
 
       // Filter for active device
-      const deviceReadings = this.activeDeviceCode
+      const relevant = this.activeDeviceCode
         ? data.filter(r => r.device_code === this.activeDeviceCode)
         : data;
 
-      const relevant = deviceReadings.length > 0 ? deviceReadings : data;
+      if (relevant.length === 0) return;
 
       // Sort ascending by timestamp
       const sorted = [...relevant].sort((a, b) => {

@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { DeviceService, Dispositivo, Lectura } from '../services/device.service';
 import { Reading } from '../services/readings.service';
-import { SensorService } from '../services/sensor.service';
+import { SensorService, SensorData } from '../services/sensor.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -248,12 +248,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.flushPendingChart();
   }
 
-  /** Applies a Reading (from /api/readings fallback) to the dashboard state */
-  private applyReading(reading: Reading) {
-    const readingTimestamp = reading.timestamp || reading.created_at;
-    this.temperaturaNum = reading.temperatura;
-    this.temperatura = reading.temperatura.toFixed(1);
-    this.humedadActual = reading.humedad ?? null;
+  /** Applies centralized SensorData (from SensorService) to the dashboard state */
+  private applySensorData(data: SensorData) {
+    this.temperaturaNum = data.temperatura;
+    this.temperatura = data.temperatura.toFixed(1);
+    this.humedadActual = data.humedad;
     this.energia = 'Normal';
 
     // Compressor logic: ON if temp > max, OFF if within range
@@ -263,10 +262,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       this.compresor = 'Apagado';
     }
 
-    this.ultimaActualizacion = this.formatTimestamp(readingTimestamp);
+    this.ultimaActualizacion = this.formatTimestamp(data.timestamp);
 
     // Connection status based on timestamp
-    const secondsAgo = this.getSecondsAgo(readingTimestamp);
+    const secondsAgo = this.getSecondsAgo(data.timestamp);
     if (secondsAgo <= 10) {
       this.deviceStatus = 'activo';
     } else {
@@ -447,12 +446,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.sensorSub = this.sensorService.latestData$.subscribe(data => {
       if (!data) return;
       this.isLoading = false;
-      this.applyReading({
-        device_code: data.device_code,
-        temperatura: data.temperatura,
-        humedad: data.humedad ?? 0,
-        timestamp: data.timestamp || undefined,
-      });
+      this.applySensorData(data);
     });
 
     // Subscribe to all readings for chart + min/max
