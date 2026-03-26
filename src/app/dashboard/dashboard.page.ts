@@ -53,6 +53,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   fueraDeRango = false;
   alertaTempMsg = '';
 
+  // User preference: alerts enabled/disabled (synced from configuration page)
+  alertsEnabled = true;
+
   // Tracks whether the device-specific endpoints returned data
   private deviceEndpointHadData = false;
   private deviceHistorialHadData = false;
@@ -64,6 +67,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   // Chart.js
   private chart: Chart | null = null;
+
+  // Pending chart data (stored when canvas is unavailable due to *ngIf hiding it;
+  // cleared after successful render in renderChart/renderChartFromReadings, or on data reload)
+  private pendingChartReadings: Lectura[] | null = null;
+  private pendingChartFromReadings: Reading[] | null = null;
 
   // RxJS subscriptions for polling
   private pollingSub: Subscription | null = null;
@@ -104,6 +112,10 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     if (savedUnit === 'F' || savedUnit === 'C') {
       this.unit = savedUnit;
     }
+    // Reload alerts preference (default to enabled if not set)
+    const savedAlerts = localStorage.getItem('alertsEnabled');
+    this.alertsEnabled = savedAlerts === null || savedAlerts !== 'false';
+
     this.cargarDatos();
     this.startPolling();
   }
@@ -144,6 +156,18 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
     this.isLoading = true;
     this.errorMsg = '';
     this.sinDatos = false;
+
+    // Reset data flags for fresh load
+    this.deviceEndpointHadData = false;
+    this.deviceHistorialHadData = false;
+
+    // Destroy stale chart (canvas is about to be removed by *ngIf)
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
+    this.pendingChartReadings = null;
+    this.pendingChartFromReadings = null;
 
     this.deviceService.getDispositivos().subscribe({
       next: (res) => {
@@ -187,6 +211,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         this.isLoading = false;
         if (!res.reading) {
           this.deviceEndpointHadData = false;
+          this.cdr.detectChanges();
+          this.flushPendingChart();
           return;
         }
         this.deviceEndpointHadData = true;
@@ -195,6 +221,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       error: () => {
         this.isLoading = false;
         this.deviceEndpointHadData = false;
+        this.cdr.detectChanges();
+        this.flushPendingChart();
       },
     });
   }
@@ -228,6 +256,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
     this.evaluarAlerta();
     this.cdr.detectChanges();
+    this.flushPendingChart();
   }
 
   /** Applies a Reading (from /api/readings fallback) to the dashboard state */
@@ -257,6 +286,7 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
     this.evaluarAlerta();
     this.cdr.detectChanges();
+    this.flushPendingChart();
   }
 
   /** Formats a timestamp string into a readable date/time */
@@ -307,7 +337,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
   }
 
   private renderChart(readings: Lectura[]) {
-    if (!this.chartCanvas) return;
+    if (!this.chartCanvas?.nativeElement) {
+      this.pendingChartReadings = readings;
+      return;
+    }
+    this.pendingChartReadings = null;
 
     const labels = readings.map((r) => {
       const ts = r.timestamp || (r as any).created_at;
@@ -324,7 +358,11 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
 
   /** Renders chart from Reading[] (fallback from /api/readings) */
   private renderChartFromReadings(readings: Reading[]) {
-    if (!this.chartCanvas) return;
+    if (!this.chartCanvas?.nativeElement) {
+      this.pendingChartFromReadings = readings;
+      return;
+    }
+    this.pendingChartFromReadings = null;
 
     const labels = readings.map((r) => {
       const ts = r.timestamp || r.created_at;
@@ -389,6 +427,15 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         },
       },
     });
+  }
+
+  /** Renders any pending chart data that was deferred because the canvas was not yet in the DOM */
+  private flushPendingChart() {
+    if (this.pendingChartReadings) {
+      this.renderChart(this.pendingChartReadings);
+    } else if (this.pendingChartFromReadings) {
+      this.renderChartFromReadings(this.pendingChartFromReadings);
+    }
   }
 
   /** Stop all polling subscriptions */
