@@ -8,10 +8,20 @@
   <h2>Configuración</h2>
 </div>
 
+<!-- NO DEVICE STATE -->
+<div class="device-card" *ngIf="sinDispositivo">
+  <p style="text-align:center; opacity:0.7;">No tienes dispositivos registrados. Ve a tu perfil para agregar uno.</p>
+</div>
+
+<!-- ERROR STATE -->
+<div class="device-card" *ngIf="errorMsg && sinDispositivo" style="text-align:center;">
+  <p style="color:#ff5252;">⚠️ {{errorMsg}}</p>
+</div>
+
 
 <!-- NOMBRE DISPOSITIVO -->
 
-<div class="device-card">
+<div class="device-card" *ngIf="!sinDispositivo">
 
   <div class="device-title">
     <img src="assets/img/device.png">
@@ -30,7 +40,7 @@
 
 <!-- RANGO TEMPERATURA -->
 
-<div class="temp-card">
+<div class="temp-card" *ngIf="!sinDispositivo">
 
 <h3>Rango de Temperatura</h3>
 
@@ -130,12 +140,12 @@ Fahrenheit (°F)
 
 <!-- BOTON GUARDAR -->
 
-<button class="save-btn" (click)="guardar()" [disabled]="isLoading">
+<button class="save-btn" *ngIf="!sinDispositivo" (click)="guardar()" [disabled]="isLoading">
   {{ isLoading ? 'Guardando...' : 'Guardar Configuración' }}
 </button>
 
 <p class="success-msg" *ngIf="guardado">✅ Configuración guardada correctamente.</p>
-<p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+<p class="error-msg" *ngIf="errorMsg && !sinDispositivo">{{ errorMsg }}</p>
 
 
 <!-- CAMBIO DE CONTRASEÑA -->

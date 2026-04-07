@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, ViewWillEnter } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import { DeviceService, Dispositivo } from '../services/device.service';
   standalone: true,
   imports: [IonContent, FormsModule, CommonModule],
 })
-export class ConfiguracionPage implements OnInit, OnDestroy {
+export class ConfiguracionPage implements OnInit, OnDestroy, ViewWillEnter {
   // Temperature limits for validation
   private static readonly TEMP_ABS_MIN = -10;
   private static readonly TEMP_ABS_MAX = 15;
@@ -39,6 +39,9 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
   showCurrentPassword = false;
   showNewPassword = false;
 
+  // No device registered
+  sinDispositivo = false;
+
   private successTimer: ReturnType<typeof setTimeout> | null = null;
   private dispositivoId: number | null = null;
   private readonly auth = inject(AuthService);
@@ -46,6 +49,17 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   ngOnInit() {
+    this.loadPreferences();
+    this.cargarConfiguracion();
+  }
+
+  /** Reload device config every time the user navigates to this page */
+  ionViewWillEnter() {
+    this.loadPreferences();
+    this.cargarConfiguracion();
+  }
+
+  private loadPreferences() {
     // Load saved unit preference
     const savedUnit = localStorage.getItem('tempUnit');
     if (savedUnit === 'F' || savedUnit === 'C') {
@@ -56,33 +70,47 @@ export class ConfiguracionPage implements OnInit, OnDestroy {
     if (savedAlerts !== null) {
       this.alerts = savedAlerts !== 'false';
     }
-    this.cargarConfiguracion();
   }
 
   private cargarConfiguracion() {
-    // Intentar usar el dispositivo activo guardado
-    const active = this.deviceService.getActiveDevice();
+    this.sinDispositivo = false;
+    this.errorMsg = '';
 
-    if (active) {
-      this.dispositivoId = active.id;
-      this.deviceName = active.nombre;
-      this.minTemp = active.limiteMin;
-      this.maxTemp = active.limiteMax;
-      return;
-    }
-
-    // Si no hay dispositivo activo, cargar el primero de la lista
+    // Always fetch fresh device list from backend
     this.deviceService.getDispositivos().subscribe({
       next: (res) => {
         if (res.devices && res.devices.length > 0) {
-          const d: Dispositivo = res.devices[0];
+          // Prefer the already-active device; fall back to the first one
+          const active = this.deviceService.getActiveDevice();
+          const match = active
+            ? res.devices.find((d) => d.id === active.id)
+            : null;
+          const d: Dispositivo = match || res.devices[0];
+
           this.dispositivoId = d.id;
           this.deviceName = d.nombre;
           this.minTemp = d.limiteMin;
           this.maxTemp = d.limiteMax;
 
-          // Guardar como dispositivo activo
+          // Keep active device in sync
           this.deviceService.setActiveDevice(d);
+        } else {
+          this.sinDispositivo = true;
+        }
+      },
+      error: (err) => {
+        console.error('[Configuracion] Error al cargar dispositivos:', err);
+        // Try using cached active device as fallback
+        const active = this.deviceService.getActiveDevice();
+        if (active) {
+          this.dispositivoId = active.id;
+          this.deviceName = active.nombre;
+          this.minTemp = active.limiteMin;
+          this.maxTemp = active.limiteMax;
+        } else {
+          this.errorMsg = err.status === 0
+            ? 'No se puede conectar al servidor.'
+            : 'Error al cargar la configuración.';
         }
       },
     });

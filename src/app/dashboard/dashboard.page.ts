@@ -212,9 +212,14 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
       },
       error: (err) => {
         this.isLoading = false;
+        if (err.status === 401) {
+          this.auth.logout();
+          return;
+        }
         this.errorMsg = err.status === 0
-          ? 'No se puede conectar al servidor.'
+          ? 'No se puede conectar al servidor. Verifica tu conexión a internet.'
           : 'Error al cargar datos del dispositivo.';
+        console.error('[Dashboard] Error al cargar dispositivos:', err);
       },
     });
   }
