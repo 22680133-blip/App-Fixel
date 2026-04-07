@@ -49,8 +49,7 @@ export class ConfiguracionPage implements OnInit, OnDestroy, ViewWillEnter {
   private readonly router = inject(Router);
 
   ngOnInit() {
-    this.loadPreferences();
-    this.cargarConfiguracion();
+    // Preferences and device data are loaded in ionViewWillEnter
   }
 
   /** Reload device config every time the user navigates to this page */

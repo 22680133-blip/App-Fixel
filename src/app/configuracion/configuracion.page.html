@@ -13,7 +13,7 @@
   <p style="text-align:center; opacity:0.7;">No tienes dispositivos registrados. Ve a tu perfil para agregar uno.</p>
 </div>
 
-<!-- ERROR STATE -->
+<!-- ERROR STATE (shown when no device AND error, or when general error) -->
 <div class="device-card" *ngIf="errorMsg && sinDispositivo" style="text-align:center;">
   <p style="color:#ff5252;">⚠️ {{errorMsg}}</p>
 </div>
