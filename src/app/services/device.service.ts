@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { AuthService } from './auth.service';
 
 export interface Dispositivo {
   id: number;
@@ -34,16 +33,11 @@ export interface ConfigDispositivo {
 @Injectable({ providedIn: 'root' })
 export class DeviceService {
   private readonly http = inject(HttpClient);
-  private readonly auth = inject(AuthService);
   private readonly API = environment.apiUrl;
 
   /** Dispositivo activo seleccionado por el usuario */
   private activeDeviceSubject = new BehaviorSubject<Dispositivo | null>(this.loadActiveDevice());
   activeDevice$ = this.activeDeviceSubject.asObservable();
-
-  private get headers(): HttpHeaders {
-    return new HttpHeaders({ Authorization: `Bearer ${this.auth.getToken()}` });
-  }
 
   // ============================================================
   // Estado del dispositivo activo (persiste en localStorage)
@@ -72,28 +66,22 @@ export class DeviceService {
   }
 
   // ============================================================
-  // API CRUD
+  // API CRUD (interceptor adds JWT automatically)
   // ============================================================
 
   /** Listar todos los dispositivos del usuario */
   getDispositivos(): Observable<{ devices: Dispositivo[] }> {
-    return this.http.get<{ devices: Dispositivo[] }>(`${this.API}/devices`, {
-      headers: this.headers,
-    });
+    return this.http.get<{ devices: Dispositivo[] }>(`${this.API}/devices`);
   }
 
   /** Obtener un dispositivo por ID */
   getDispositivo(id: number): Observable<{ device: Dispositivo }> {
-    return this.http.get<{ device: Dispositivo }>(`${this.API}/devices/${id}`, {
-      headers: this.headers,
-    });
+    return this.http.get<{ device: Dispositivo }>(`${this.API}/devices/${id}`);
   }
 
   /** Crear un nuevo dispositivo (el backend genera el deviceId automáticamente) */
   crearDispositivo(data: Partial<Dispositivo>): Observable<{ device: Dispositivo }> {
-    return this.http.post<{ device: Dispositivo }>(`${this.API}/devices`, data, {
-      headers: this.headers,
-    });
+    return this.http.post<{ device: Dispositivo }>(`${this.API}/devices`, data);
   }
 
   /** Actualizar configuración de un dispositivo */
@@ -101,16 +89,12 @@ export class DeviceService {
     id: number,
     data: Partial<Dispositivo>
   ): Observable<{ device: Dispositivo }> {
-    return this.http.put<{ device: Dispositivo }>(`${this.API}/devices/${id}`, data, {
-      headers: this.headers,
-    });
+    return this.http.put<{ device: Dispositivo }>(`${this.API}/devices/${id}`, data);
   }
 
   /** Eliminar un dispositivo */
   eliminarDispositivo(id: number): Observable<{ mensaje: string }> {
-    return this.http.delete<{ mensaje: string }>(`${this.API}/devices/${id}`, {
-      headers: this.headers,
-    });
+    return this.http.delete<{ mensaje: string }>(`${this.API}/devices/${id}`);
   }
 
   /** Guardar configuración de temperatura y alertas (desde pantalla Configuración) */
@@ -135,7 +119,7 @@ export class DeviceService {
   getUltimaLectura(deviceId: number): Observable<{ reading: Lectura | null }> {
     return this.http.get<{ readings: any[] }>(
       `${this.API}/devices/${deviceId}/readings`,
-      { headers: this.headers, params: { limit: '1' } }
+      { params: { limit: '1' } }
     ).pipe(
       map(res => ({
         reading: res.readings && res.readings.length > 0
@@ -149,7 +133,7 @@ export class DeviceService {
   getHistorial(deviceId: number): Observable<{ readings: Lectura[] }> {
     return this.http.get<{ readings: any[] }>(
       `${this.API}/devices/${deviceId}/readings`,
-      { headers: this.headers, params: { limit: '100' } }
+      { params: { limit: '100' } }
     ).pipe(
       map(res => ({
         readings: (res.readings || [])

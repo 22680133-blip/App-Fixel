@@ -14,6 +14,9 @@ export interface Reading {
   fecha?: string;
 }
 
+/** Polling interval in milliseconds */
+const POLL_INTERVAL_MS = 10_000;
+
 @Injectable({ providedIn: 'root' })
 export class ReadingsService {
   private readonly http = inject(HttpClient);
@@ -28,12 +31,15 @@ export class ReadingsService {
     return this.http.get<Reading[]>(`${this.API}/readings`, { params });
   }
 
-  /** Observable que emite lecturas cada 5 segundos (emite inmediatamente al suscribirse) */
+  /** Observable que emite lecturas cada 10 segundos (emite inmediatamente al suscribirse) */
   getRealtimeData(deviceCode?: string): Observable<Reading[]> {
-    return interval(5000).pipe(
+    return interval(POLL_INTERVAL_MS).pipe(
       startWith(0),
       switchMap(() => this.getReadings(deviceCode).pipe(
-        catchError(() => of([] as Reading[]))
+        catchError((err) => {
+          console.error('[ReadingsService] Error fetching readings:', err.message || err);
+          return of([] as Reading[]);
+        })
       ))
     );
   }
