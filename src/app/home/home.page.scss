@@ -3,26 +3,7 @@
 @import '../shared-styles.scss';
 }
 
-/* CONTENEDOR */
-.container {
-  padding: 25px 18px;
-  text-align: center;
-// ...existing code...
-  margin-top: 30px;
-  margin-bottom: 20px;
-// ...existing code...
-  color: #fff;
-  font-weight: 500;
-// ...existing code...
-  display: flex;
-  align-items: center;
-  background: #00e5ff;
-  padding: 14px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-  text-align: left;
-  border: 2px solid #fff;
-}
+/* FEATURE CARDS */
 .feature-card {
   display: flex;
   align-items: center;
@@ -33,82 +14,83 @@
   border: 2px solid #00e5ff;
   color: #fff;
   font-weight: 500;
-  text-align: left; 
-  margin-bottom: 16px;
+  text-align: left;
+  gap: 10px;
 }
+
 .feature-card h3 {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bold;
   color: #00e5ff;
 }
 
 .feature-card p {
   margin: 4px 0 0 0;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #fff;
 }
 
 .icon {
-  width: 38px;
-  margin-right: 12px;
+  width: 36px;
+  min-width: 36px;
+  height: auto;
 }
 
 /* BOTON */
 .start-btn {
-  width:100%;
-  margin-top:20px;
-
-  padding:14px;
-
-  border:none;
-  border-radius:12px;
-
-  background:linear-gradient(135deg,#ff3d6e,#ff1654);
-
-  color:white;
-  font-size:16px;
-  font-weight:700;
-
-  box-shadow:0 4px 15px rgba(255,61,110,0.35);
-
-  transition:.3s;
-}
-
-.start-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 25px rgba(255,61,110,0.5);
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff3d6e, #ff1654);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 61, 110, 0.35);
+  transition: 0.3s;
+  min-height: 50px;
+  cursor: pointer;
 }
 
 .start-btn:active {
-  transform: scale(.98);
+  transform: scale(0.98);
 }
 
+/* 📲 Tablets */
 @media (min-width: 768px) {
-
-  .container {
-    max-width: 500px;
-  }
-
-  .logo-container img {
-    width: 180px;
-    height: 180px;
-  }
-
-  .title {
-    font-size: 20px;
+  .feature-card {
+    padding: 16px;
   }
 
   .feature-card h3 {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .feature-card p {
-    font-size: 13px;
+    font-size: 0.813rem;
   }
 
   .start-btn {
-    height: 50px;
-    font-size: 16px;
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  .icon {
+    width: 42px;
+    min-width: 42px;
+  }
+}
+
+/* 💻 Desktop */
+@media (min-width: 1024px) {
+  .feature-card {
+    padding: 18px;
+  }
+
+  .icon {
+    width: 48px;
+    min-width: 48px;
   }
 }

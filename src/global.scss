@@ -38,3 +38,46 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* ============================================================ */
+/* Global Responsive Base Styles                                  */
+/* ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch-friendly minimum tap target */
+button,
+[role="button"],
+a,
+input[type="submit"],
+input[type="button"] {
+  min-height: 44px;
+}
+
+/* Ensure images never overflow their container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Base responsive font */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 360px) {
+  html {
+    font-size: 14px;
+  }
+}
