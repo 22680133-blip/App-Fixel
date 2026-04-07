@@ -4,35 +4,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 16px;
   min-height: 100vh;
 }
 
-/* wrapper centra la tarjeta y limita ancho */
-.login-wrapper {
-  width: 100%;
-  max-width: 420px; /* igual que pantalla 1 */
-  // ...existing code...
-  display: flex;
-  justify-content: center;
-  // ...existing code...
-  background: rgba(20, 25, 28, 0.85);
-  border-radius: 8px;
-  // ...existing code...
-}
 /* textos */
 .title {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
   margin: 6px 0 4px;
   text-align: center;
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 0.813rem;
   color: #cbd5e1;
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 /* label */
@@ -40,26 +28,25 @@
   display: block;
   text-align: left;
   color: #fff;
-  font-size: 14px;
-  margin: 12px 0 6px;
+  font-size: 0.875rem;
+  margin: 10px 0 6px;
 }
 
-/* input-group estilo turquesa como la imagen */
+/* input-group estilo turquesa */
 .input-group {
   display: flex;
   align-items: center;
   background: #ffffff;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 4px solid #00e5ff; /* borde turquesa */
-  border:4px solid rgba(0,229,255,0.25);
-  margin-bottom: 12px;
-  gap: 10px;
+  border: 3px solid rgba(0, 229, 255, 0.25);
+  margin-bottom: 10px;
+  gap: 8px;
 }
 
 .input-group:focus-within {
-  border-color:#00e5ff;
-  box-shadow:0 0 20px rgba(0,229,255,0.4);
+  border-color: #00e5ff;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
 }
 
 .input-group.error {
@@ -68,8 +55,9 @@
 }
 
 .icon-img {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
   object-fit: contain;
 }
 
@@ -77,7 +65,8 @@
   border: none;
   outline: none;
   flex: 1;
-  font-size: 15px;
+  min-width: 0;
+  font-size: 0.938rem;
   background: transparent;
   color: #000000;
   font-weight: 500;
@@ -88,14 +77,18 @@
   color: #666666;
   opacity: 0.8;
 }
+
 /* botón ojo */
 .eye-btn {
   background: transparent;
   border: none;
   padding: 0;
-  margin-left: 6px;
+  margin-left: 4px;
   display: flex;
   align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
 }
 
 .eye-img {
@@ -108,52 +101,37 @@
 .forgot {
   text-align: right;
   color: #cbd5e1;
-  font-size: 13px;
-  margin-bottom: 18px;
+  font-size: 0.813rem;
+  margin-bottom: 14px;
 }
 
 /* BOTON LOGIN */
-.login-btn{
-  width:100%;
-  margin-top:20px;
-
-  padding:14px;
-
-  border:none;
-  border-radius:12px;
-
-  background:linear-gradient(135deg,#ff3d6e,#ff1654);
-
-  color:white;
-  font-size:16px;
-  font-weight:700;
-
-  box-shadow:0 4px 15px rgba(255,61,110,0.35);
-
-  transition:.3s;
-}
-
-.login-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 25px rgba(255,61,110,0.5);
+.login-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff3d6e, #ff1654);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 61, 110, 0.35);
+  transition: 0.3s;
+  min-height: 50px;
+  cursor: pointer;
 }
 
 .login-btn:active {
-  transform: scale(.98);
+  transform: scale(0.98);
 }
 
-/* contador / link registro */
-.counter {
-  text-align: center;
-  margin: 12px 0;
-  color: #cfd8dc;
-}
-
+/* link registro */
 .register {
   text-align: center;
   color: #cfd8dc;
-  font-size: 14px;
-  margin-top: 16px;
+  font-size: 0.875rem;
+  margin-top: 14px;
 }
 
 .register span {
@@ -162,35 +140,14 @@
   cursor: pointer;
 }
 
-/* ---------- Media queries ---------- */
-/* telef pequeños */
-@media (max-width: 360px) {
-  .logo { width: 120px; height: 120px; border-width: 5px; }
-  .card { padding: 30px 16px 20px; }
-  .title { font-size: 22px; }
-}
-
-/* tablets */
-@media (min-width: 768px) {
-  .login-wrapper { max-width: 520px; }
-  .logo { width: 160px; height: 160px; }
-  .card { padding: 48px; margin-top: -60px; border-radius: 12px; }
-  .title { font-size: 28px; }
-}
-
-/* pantallas grandes */
-@media (min-width: 1200px) {
-  .login-wrapper { max-width: 600px; }
-}
-
 /* --------- SOCIAL LOGIN BUTTONS --------- */
 
 /* Divisor con línea y O */
 .divider-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 24px 0;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .divider-line {
@@ -201,23 +158,23 @@
 
 .divider-text {
   color: #cbd5e1;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 500;
 }
 
 /* Contenedor de botones sociales */
 .social-login {
   display: flex;
-  gap: 18px;
+  gap: 16px;
   justify-content: center;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 /* Botones sociales en círculo */
 .social-btn {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
@@ -229,20 +186,14 @@
   padding: 0;
 
   ion-icon {
-    font-size: 28px;
+    font-size: 26px;
     color: #ffffff;
   }
 
   .social-icon {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     object-fit: contain;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
   }
 
   &:active {
@@ -264,8 +215,8 @@
 
 /* Google rendered button wrapper */
 .google-btn-wrapper {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -290,11 +241,11 @@
 .input-error {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #c62828;
-  font-size: 13px;
-  margin-top: 8px;
-  margin-bottom: 14px;
+  font-size: 0.813rem;
+  margin-top: 6px;
+  margin-bottom: 10px;
   padding: 10px 12px;
   background: #ffebee;
   border-radius: 8px;
@@ -322,5 +273,23 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 📱 Small phones */
+@media (max-width: 360px) {
+  .title {
+    font-size: 1.375rem;
+  }
+
+  .input-group {
+    padding: 8px 10px;
+  }
+}
+
+/* 📲 Tablets */
+@media (min-width: 768px) {
+  .title {
+    font-size: 1.75rem;
   }
 }

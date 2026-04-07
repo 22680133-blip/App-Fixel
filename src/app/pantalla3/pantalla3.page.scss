@@ -1,12 +1,3 @@
-.register-content {
-  --background: linear-gradient(180deg, #1f2937, #111827);
-  @import '../shared-styles.scss';
-  display: flex;
-  // ...existing code...
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
 @import '../shared-styles.scss';
 
 .login-content {
@@ -14,14 +5,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 16px;
   min-height: 100vh;
 }
+
 .label {
   display: block;
   text-align: left;
   color: white;
-  margin: 10px 0 6px;
+  margin: 8px 0 6px;
+  font-size: 0.875rem;
 }
 
 /* INPUTS */
@@ -30,14 +23,16 @@
   display: flex;
   align-items: center;
   background: white;
-  border: 4px solid #00e5ff;
+  border: 3px solid rgba(0, 229, 255, 0.25);
   border-radius: 12px;
   padding: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  gap: 8px;
 }
 
 .input-group:focus-within {
   border-color: #06b6d4;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
 }
 
 .input-group.error {
@@ -49,10 +44,12 @@
   border: none;
   outline: none;
   flex: 1;
-  font-size: 14px;
+  min-width: 0;
+  font-size: 0.875rem;
   background: transparent;
   color: #000000;
   font-weight: 500;
+  padding: 4px 0;
 }
 
 .input-group input::placeholder {
@@ -62,36 +59,26 @@
 
 .icon-img {
   width: 22px;
-  margin-right: 8px;
+  min-width: 22px;
+  height: auto;
 }
 
 .eye-btn {
   background: none;
   border: none;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .eye-img {
   width: 20px;
 }
 
-/* TERMINOS */
-
-.terms {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #cbd5e1;
-  margin: 12px 0 20px;
-}
-
 /* BOTON */
-
-.register-btn {
-  width: 100%;
-  margin-top: 25px;
-  --background: #FF3366;
-}
 
 .login-btn {
   width: 100%;
@@ -100,27 +87,32 @@
   background: #ff3d6e;
   color: white;
   font-weight: 700;
-  font-size: 16px;
-  border: 3px solid rgba(255,255,255,0.06);
+  font-size: 1rem;
+  border: 3px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
-  transition: transform .12s ease, filter .12s ease;
+  transition: transform 0.12s ease, filter 0.12s ease;
+  min-height: 50px;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
 }
 
 /* Contenedor de botones sociales */
 .social-login {
   display: flex;
-  gap: 18px;
+  gap: 16px;
   justify-content: center;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 /* Divisor con línea y O */
 .divider-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 24px 0;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .divider-line {
@@ -131,13 +123,13 @@
 
 .divider-text {
   color: #cbd5e1;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 500;
 }
 
 .social-btn {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
@@ -149,20 +141,14 @@
   padding: 0;
 
   ion-icon {
-    font-size: 28px;
+    font-size: 26px;
     color: #ffffff;
   }
 
   .social-icon {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     object-fit: contain;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
   }
 
   &:active {
@@ -184,8 +170,8 @@
 
 /* Google rendered button wrapper */
 .google-btn-wrapper {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -210,11 +196,11 @@
 .input-error {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #c62828;
-  font-size: 13px;
-  margin-top: 8px;
-  margin-bottom: 14px;
+  font-size: 0.813rem;
+  margin-top: 6px;
+  margin-bottom: 10px;
   padding: 10px 12px;
   background: #ffebee;
   border-radius: 8px;
@@ -244,4 +230,3 @@
     transform: translateY(0);
   }
 }
-

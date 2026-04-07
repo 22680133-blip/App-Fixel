@@ -8,30 +8,30 @@
 
 .container{
 
-  padding:30px 20px;
+  padding:24px 16px;
   max-width:500px;
-  margin:auto;
+  margin:0 auto;
+  width:100%;
   text-align:center;
 }
 
 /* CHECK */
 
 .check-circle{
-  width:100px;
-  height:100px;
+  width:80px;
+  height:80px;
   background:#39d98a;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:auto;
-  margin-bottom:20px;
+  margin:0 auto 16px auto;
   box-shadow: 0 4px 15px rgba(57, 217, 138, 0.3);
 }
 
 .check-circle img{
-  width:60px;
-  height:60px;
+  width:50px;
+  height:50px;
   object-fit: contain;
 }
 
@@ -39,16 +39,16 @@
 
 .title{
 
-  font-size:26px;
+  font-size:1.5rem;
   font-weight:bold;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 .subtitle{
 
   color:#cfcfcf;
-  font-size:14px;
-  margin-bottom:25px;
+  font-size:0.875rem;
+  margin-bottom:20px;
 }
 
 /* TARJETA GENERAL */
@@ -59,16 +59,16 @@
   border:2px solid #ffffff;
   border-radius:12px;
 
-  padding:15px;
+  padding:14px;
   text-align:left;
 
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
 .card-title{
 
-  font-size:14px;
-  margin-bottom:10px;
+  font-size:0.875rem;
+  margin-bottom:8px;
 }
 
 .selected-foods-list{
@@ -80,18 +80,18 @@
 .selected-food{
   display:inline-flex;
   align-items:center;
-  gap:8px;
+  gap:6px;
   background:#19d3d3;
   color:#000;
-  padding:8px 12px;
+  padding:6px 10px;
   border-radius:10px;
-  font-size:13px;
+  font-size:0.813rem;
   font-weight:600;
 }
 
 .selected-food img{
-  width:24px;
-  height:24px;
+  width:22px;
+  height:22px;
   object-fit: contain;
 }
 
@@ -102,9 +102,9 @@
   background:#19d3d3;
 
   border-radius:12px;
-  padding:20px;
+  padding:16px;
 
-  margin-bottom:25px;
+  margin-bottom:20px;
 
   color:#000;
 }
@@ -114,19 +114,20 @@
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:20px;
+  gap:16px;
 
-  margin-top:10px;
+  margin-top:8px;
+  flex-wrap:wrap;
 }
 
 .temp-values strong{
 
-  font-size:22px;
+  font-size:1.25rem;
 }
 
 .arrow{
 
-  font-size:25px;
+  font-size:1.5rem;
 }
 
 /* CONSEJO */
@@ -136,18 +137,18 @@
   background:#1ccad8;
 
   border-radius:12px;
-  padding:15px;
+  padding:14px;
 
   display:flex;
   align-items:center;
   gap:10px;
 
-  margin-bottom:30px;
+  margin-bottom:24px;
 }
 
 .tip-icon{
-  width:40px;
-  height:40px;
+  width:36px;
+  height:36px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -155,14 +156,14 @@
 }
 
 .tip-icon img{
-  width:35px;
-  height:35px;
+  width:30px;
+  height:30px;
   object-fit: contain;
 }
 
 .tip-text{
 
-  font-size:13px;
+  font-size:0.813rem;
   text-align:left;
 }
 
@@ -170,32 +171,76 @@
 
 .confirm-btn{
 
-  width:80%;
-  height:55px;
+  width:100%;
+  min-height:50px;
 
   background:#ff3b6b;
 
-  border-radius:40px;
+  border-radius:28px;
   border:none;
 
   color:white;
-  font-size:18px;
+  font-size:1rem;
   font-weight:bold;
 
-  margin-bottom:15px;
+  margin-bottom:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.confirm-btn:active{
+  transform:scale(0.98);
 }
 
 .back-btn{
 
-  width:80%;
-  height:55px;
+  width:100%;
+  min-height:50px;
 
   background:#ff3b6b;
 
-  border-radius:40px;
+  border-radius:28px;
   border:none;
 
   color:white;
-  font-size:18px;
+  font-size:1rem;
   font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.back-btn:active{
+  transform:scale(0.98);
+}
+
+/* 📲 Tablets */
+@media (min-width: 768px) {
+  .container {
+    max-width: 580px;
+  }
+
+  .check-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .check-circle img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .temp-values strong {
+    font-size: 1.5rem;
+  }
+}
+
+/* 💻 Desktop */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 650px;
+  }
 }

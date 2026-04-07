@@ -58,21 +58,17 @@ ion-content {
   animation: fadeIn 0.4s ease-in-out;
 }
 
-/* Botones con efecto hover */
+/* Botones con efecto activo (touch-friendly) */
 button {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
 button:active {
   transform: translateY(0);
+  opacity: 0.85;
 }
 
-/* Cards con efecto hover */
+/* Cards con transiciones */
 .feature-card,
 .food-card,
 .device-card,
@@ -83,16 +79,23 @@ button:active {
 .user-card,
 .devices-card,
 .settings-card,
-.temp-card,
-.alert-card {
+.temp-card {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.feature-card:hover,
-.food-card:hover,
-.device:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.2);
+/* Hover effects only for devices that support it (not touch) */
+@media (hover: hover) and (pointer: fine) {
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .feature-card:hover,
+  .food-card:hover,
+  .device:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 229, 255, 0.2);
+  }
 }
 
 /* Input Focus */

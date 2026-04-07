@@ -6,9 +6,9 @@
 }
 
 .container {
-  padding: 20px;
+  padding: 16px;
   max-width: 500px;
-  margin: auto;
+  margin: 0 auto;
   width: 100%;
 }
 
@@ -17,81 +17,78 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   animation: fadeIn 0.4s ease-in-out;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .fridge-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
 
 .fridge-info h2 {
   color: #fff;
   margin: 0;
-  font-size: 18px;
+  font-size: 1rem;
   font-weight: 700;
+  word-break: break-word;
 }
 
 .fridge-info p {
   margin: 0;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .device-id-text {
   color: rgba(0, 229, 255, 0.8) !important;
   font-family: monospace;
-  font-size: 11px !important;
+  font-size: 0.688rem !important;
   margin-bottom: 2px !important;
+  word-break: break-all;
 }
 
 .fridge-icon {
-  width: 65px;
-  height: 65px;
+  width: 55px;
+  height: 55px;
+  min-width: 55px;
   object-fit: contain;
-  padding: 8px;
+  padding: 6px;
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.1));
   border: 2px solid rgba(0, 229, 255, 0.3);
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
-.fridge-icon:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(25, 211, 211, 0.15));
-  border-color: #00e5ff;
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-}
-
 .icons-section {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .user-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   object-fit: contain;
   cursor: pointer;
-  padding: 6px;
+  padding: 5px;
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.user-icon:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.1));
-  border-color: #00e5ff;
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
-}
-
 .settings-icon {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
   object-fit: contain;
   cursor: pointer;
   padding: 4px;
@@ -101,13 +98,6 @@
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.settings-icon:hover {
-  transform: translateY(-2px) rotate(15deg);
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.1));
-  border-color: #00e5ff;
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
-}
-
 /* USER */
 .user {
   display: flex;
@@ -115,84 +105,94 @@
   align-items: center;
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   animation: fadeIn 0.5s ease-in-out;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .user-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: #fff;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 0.875rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .user-left img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   object-fit: contain;
   filter: brightness(1.1);
+}
+
+.user-left span {
+  word-break: break-word;
 }
 
 .logout {
   color: #ff6b9d;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   transition: all 0.3s ease;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
-}
-
-.logout:hover {
-  background: rgba(255, 107, 157, 0.1);
-  color: #ff3d6e;
+  white-space: nowrap;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 /* DEVICE */
 .device-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.3);
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 229, 255, 0.1);
   transition: all 0.3s ease;
   animation: fadeIn 0.6s ease-in-out;
-}
-
-.device-card:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.1));
-  border-color: #00e5ff;
-  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.2);
-  transform: translateY(-2px);
+  gap: 10px;
 }
 
 .device-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: white;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 0.875rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .device-left img {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   object-fit: contain;
   filter: brightness(1.1);
+}
+
+.device-left span {
+  word-break: break-word;
 }
 
 .status-dot {
   width: 14px;
   height: 14px;
+  min-width: 14px;
   background: linear-gradient(135deg, #00ff6a, #00e5ff);
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(0, 255, 106, 0.6);
@@ -212,18 +212,19 @@
 .alert-card {
   background: linear-gradient(135deg, rgba(255, 61, 110, 0.1), rgba(255, 107, 157, 0.05));
   border: 2px solid rgba(255, 61, 110, 0.3);
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(255, 61, 110, 0.1);
   animation: slideInRight 0.6s ease-in-out;
+  align-items: flex-start;
 }
 
 .alert-card img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   flex-shrink: 0;
   filter: brightness(1.1);
@@ -232,13 +233,13 @@
 .alert-card h4 {
   color: #ff6b9d;
   margin: 0 0 4px 0;
-  font-size: 15px;
+  font-size: 0.875rem;
 }
 
 .alert-card p {
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 
 @keyframes slideInRight {
@@ -263,7 +264,7 @@
 }
 
 .alert-icon-temp {
-  font-size: 32px;
+  font-size: 28px;
   flex-shrink: 0;
 }
 
@@ -271,28 +272,23 @@
 .temperature-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.12), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.3);
-  padding: 24px;
+  padding: 20px 16px;
   border-radius: 12px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 229, 255, 0.15);
   transition: all 0.3s ease;
   animation: fadeIn 0.7s ease-in-out;
 }
 
-.temperature-card:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.08));
-  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.2);
-}
-
 .temperature-card h3 {
   color: #00e5ff;
-  margin: 0 0 12px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
 }
 
 .temp-value {
-  font-size: 48px;
+  font-size: clamp(2rem, 10vw, 3rem);
   font-weight: 700;
   background: linear-gradient(135deg, #00e5ff, #19d3d3);
   -webkit-background-clip: text;
@@ -304,45 +300,39 @@
 /* MIN MAX */
 .temp-range {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .min-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
   flex: 1;
-  padding: 18px;
+  padding: 14px 10px;
   border-radius: 12px;
   text-align: center;
   transition: all 0.3s ease;
   animation: fadeIn 0.8s ease-in-out;
-}
-
-.min-card:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.08));
-  border-color: #00e5ff;
-  box-shadow: 0 6px 15px rgba(0, 229, 255, 0.2);
-  transform: translateY(-3px);
+  min-width: 0;
 }
 
 .min-card h4 {
   color: #00e5ff;
-  margin: 0 0 8px 0;
-  font-size: 13px;
+  margin: 0 0 6px 0;
+  font-size: 0.813rem;
   font-weight: 600;
 }
 
 .min-card p {
   color: #19d3d3;
-  font-size: 22px;
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
 }
 
 .min-card .limit-ref {
   color: rgba(0, 229, 255, 0.5);
-  font-size: 11px;
+  font-size: 0.688rem;
   display: block;
   margin-top: 4px;
 }
@@ -351,37 +341,31 @@
   background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(255, 61, 110, 0.05));
   border: 2px solid rgba(255, 107, 157, 0.2);
   flex: 1;
-  padding: 18px;
+  padding: 14px 10px;
   border-radius: 12px;
   text-align: center;
   transition: all 0.3s ease;
   animation: fadeIn 0.8s ease-in-out;
-}
-
-.max-card:hover {
-  background: linear-gradient(135deg, rgba(255, 107, 157, 0.15), rgba(255, 61, 110, 0.08));
-  border-color: #ff6b9d;
-  box-shadow: 0 6px 15px rgba(255, 107, 157, 0.2);
-  transform: translateY(-3px);
+  min-width: 0;
 }
 
 .max-card h4 {
   color: #ff6b9d;
-  margin: 0 0 8px 0;
-  font-size: 13px;
+  margin: 0 0 6px 0;
+  font-size: 0.813rem;
   font-weight: 600;
 }
 
 .max-card p {
   color: #ff3d6e;
-  font-size: 22px;
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
 }
 
 .max-card .limit-ref {
   color: rgba(255, 107, 157, 0.5);
-  font-size: 11px;
+  font-size: 0.688rem;
   display: block;
   margin-top: 4px;
 }
@@ -390,32 +374,28 @@
 .history-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
-  padding: 18px;
+  padding: 16px;
   border-radius: 12px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 229, 255, 0.1);
   transition: all 0.3s ease;
   animation: fadeIn 0.9s ease-in-out;
 }
 
-.history-card:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.08));
-  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.15);
-}
-
 .history-card h4 {
   color: #00e5ff;
-  margin: 0 0 12px 0;
-  font-size: 15px;
+  margin: 0 0 10px 0;
+  font-size: 0.938rem;
   font-weight: 600;
 }
 
 .history-card img {
   width: 100%;
-  height: 180px;
+  height: auto;
+  max-height: 180px;
   object-fit: contain;
-  margin-top: 10px;
+  margin-top: 8px;
   filter: brightness(0.95);
 }
 
@@ -423,32 +403,25 @@
 .status-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .status-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
-  padding: 18px;
+  padding: 16px 10px;
   border-radius: 12px;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   animation: fadeIn 1s ease-in-out;
 }
 
-.status-card:hover {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(25, 211, 211, 0.08));
-  border-color: #00e5ff;
-  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.2);
-  transform: translateY(-4px);
-}
-
 .status-card img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -456,20 +429,16 @@
   transition: transform 0.3s ease;
 }
 
-.status-card:hover img {
-  transform: scale(1.1);
-}
-
 .status-card p {
   color: #00e5ff;
-  margin: 8px 0 0 0;
-  font-size: 12px;
+  margin: 6px 0 0 0;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .status-card span {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   display: block;
   margin-top: 4px;
@@ -483,16 +452,16 @@
 .loading-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(25, 211, 211, 0.04));
   border: 2px solid rgba(0, 229, 255, 0.2);
-  padding: 24px;
+  padding: 20px 16px;
   border-radius: 12px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .loading-card p {
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .loading-spinner {
@@ -514,27 +483,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .unit-toggle {
   background: rgba(0, 229, 255, 0.15);
   border: 1px solid rgba(0, 229, 255, 0.4);
   color: #00e5ff;
-  padding: 6px 14px;
+  padding: 8px 14px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.unit-toggle:hover {
-  background: rgba(0, 229, 255, 0.25);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .temp-status {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
+  font-size: 0.813rem;
   margin-top: 8px;
   font-weight: 600;
 }
@@ -552,12 +521,12 @@
 
 .humidity-label {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .humidity-value {
   color: #19d3d3;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
@@ -631,36 +600,38 @@
 .chat-card {
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(25, 211, 211, 0.05));
   border: 2px solid rgba(0, 229, 255, 0.2);
-  padding: 18px;
+  padding: 16px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 229, 255, 0.1);
   animation: fadeIn 1s ease-in-out;
 }
 
 .chat-card h4 {
   color: #00e5ff;
-  margin: 0 0 12px 0;
-  font-size: 15px;
+  margin: 0 0 10px 0;
+  font-size: 0.938rem;
   font-weight: 600;
 }
 
 .chat-messages {
   max-height: 220px;
   overflow-y: auto;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat-bubble {
   padding: 10px 14px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 0.813rem;
   line-height: 1.4;
   max-width: 85%;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .chat-user {
@@ -684,14 +655,16 @@
 
 .chat-input {
   flex: 1;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(0, 229, 255, 0.3);
   border-radius: 10px;
   padding: 10px 14px;
   color: #fff;
-  font-size: 13px;
+  font-size: 0.813rem;
   outline: none;
   transition: border-color 0.3s ease;
+  min-height: 44px;
 }
 
 .chat-input::placeholder {
@@ -706,21 +679,108 @@
   background: linear-gradient(135deg, #00e5ff, #19d3d3);
   border: none;
   border-radius: 10px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   color: #0f1824;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-}
-
-.chat-send-btn:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.4);
-  transform: translateY(-1px);
+  min-height: 44px;
 }
 
 .chat-send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ============================================================ */
+/* 📱 MOBILE (max-width: 480px)                                  */
+/* ============================================================ */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .fridge-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+
+  .temp-value {
+    font-size: 2rem;
+  }
+
+  .chat-input-row {
+    flex-direction: column;
+  }
+
+  .chat-send-btn {
+    width: 100%;
+  }
+}
+
+/* ============================================================ */
+/* 📲 TABLET (min-width: 768px)                                  */
+/* ============================================================ */
+@media (min-width: 768px) {
+  .container {
+    padding: 24px;
+    max-width: 600px;
+  }
+
+  .fridge-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .user-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .settings-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .fridge-info h2 {
+    font-size: 1.25rem;
+  }
+
+  .temp-value {
+    font-size: 3.25rem;
+  }
+
+  .min-card p,
+  .max-card p {
+    font-size: 1.5rem;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+}
+
+/* ============================================================ */
+/* 💻 DESKTOP (min-width: 1024px)                                */
+/* ============================================================ */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 700px;
+    padding: 30px;
+  }
+
+  .status-grid {
+    gap: 16px;
+  }
+
+  .temp-range {
+    gap: 16px;
+  }
+
+  .chart-container {
+    height: 280px;
+  }
 }
