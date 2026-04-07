@@ -34,6 +34,7 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
   dispositivos: Dispositivo[] = [];
   totalDispositivos = 0;
   activos = 0;
+  loadingDevices = true;
 
   // Editable profile fields
   editMode = false;
@@ -65,7 +66,7 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
   // Polling
   private pollingSub: Subscription | null = null;
   private readonly POLL_SECONDS = 10;
-  private static readonly ACTIVE_THRESHOLD_SECONDS = 30;
+  private static readonly ACTIVE_THRESHOLD_SECONDS = 60;
 
   ngOnInit() {
     if (this.usuario) {
@@ -120,8 +121,10 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
   }
 
   cargarDispositivos() {
+    this.loadingDevices = true;
     this.deviceService.getDispositivos().subscribe({
       next: (res) => {
+        this.loadingDevices = false;
         this.dispositivos = res.devices || [];
         this.totalDispositivos = this.dispositivos.length;
 
@@ -153,7 +156,9 @@ export class PerfilPage implements OnInit, OnDestroy, ViewWillEnter, ViewWillLea
           this.activos = activeCount;
         });
       },
-      error: () => {
+      error: (err) => {
+        this.loadingDevices = false;
+        console.error('[Perfil] Error al cargar dispositivos:', err);
         this.dispositivos = [];
         this.totalDispositivos = 0;
         this.activos = 0;

@@ -235,7 +235,8 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
           this.flushPendingChart();
         }
       },
-      error: () => {
+      error: (err) => {
+        console.error('[Dashboard] Error al cargar última lectura:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
         this.flushPendingChart();
@@ -333,8 +334,9 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
           this.renderChart(res.readings);
         }
       },
-      error: () => {
-        // Initial history load failed; SensorService will provide chart data
+      error: (err) => {
+        console.error('[Dashboard] Error al cargar historial:', err);
+        // SensorService will provide chart data as fallback
       },
     });
   }
@@ -522,8 +524,12 @@ export class DashboardPage implements OnInit, OnDestroy, AfterViewInit, ViewWill
         this.chatMessages.push({ role: 'assistant', text: res.respuesta });
         this.chatLoading = false;
       },
-      error: () => {
-        this.chatMessages.push({ role: 'assistant', text: 'No se pudo obtener respuesta del asistente. Por favor, inténtalo de nuevo.' });
+      error: (err) => {
+        console.error('[Dashboard] Error en asistente IA:', err);
+        const msg = err.status === 0
+          ? 'No se puede conectar al servidor. Verifica tu conexión.'
+          : 'No se pudo obtener respuesta del asistente. Por favor, inténtalo de nuevo.';
+        this.chatMessages.push({ role: 'assistant', text: msg });
         this.chatLoading = false;
       },
     });

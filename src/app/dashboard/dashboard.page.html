@@ -19,7 +19,8 @@
 
   <!-- NO DEVICES STATE -->
   <div class="loading-card" *ngIf="sinDatos && !isLoading">
-    <p>No tienes dispositivos registrados. Ve a tu perfil para agregar uno.</p>
+    <p>No tienes dispositivos registrados.</p>
+    <button class="unit-toggle" style="margin-top:12px;" (click)="goToPerfil()">Ir a mi perfil para agregar uno</button>
   </div>
 
   <!-- HEADER -->
@@ -118,6 +119,10 @@
     <p class="temp-status" *ngIf="temperaturaNum !== null"
        [ngClass]="{'estado-normal': estado === 'NORMAL', 'estado-alta': estado === 'ALTA', 'estado-baja': estado === 'BAJA'}">
       Estado: {{estado}}
+    </p>
+
+    <p class="temp-status" *ngIf="temperaturaNum === null" style="opacity:0.5;">
+      Esperando datos del sensor...
     </p>
 
     <div class="humidity-display" *ngIf="humedadActual !== null">
