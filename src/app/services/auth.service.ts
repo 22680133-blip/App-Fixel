@@ -71,6 +71,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+    localStorage.removeItem('activeDevice');
     this.router.navigate(['/pantalla2']);
   }
 
@@ -95,11 +96,10 @@ export class AuthService {
     localStorage.setItem('usuario', JSON.stringify(res.usuario));
   }
 
-  /** Actualizar perfil del usuario */
+  /** Actualizar perfil del usuario (interceptor adds JWT) */
   updateProfile(data: Partial<Usuario>): Observable<{ usuario: Usuario }> {
-    const headers = { Authorization: `Bearer ${this.getToken()}` };
     return this.http
-      .put<{ usuario: Usuario }>(`${this.API}/profile`, data, { headers })
+      .put<{ usuario: Usuario }>(`${this.API}/profile`, data)
       .pipe(
         tap((res) => {
           localStorage.setItem('usuario', JSON.stringify(res.usuario));
@@ -107,11 +107,10 @@ export class AuthService {
       );
   }
 
-  /** Obtener datos frescos del usuario desde el backend */
+  /** Obtener datos frescos del usuario desde el backend (interceptor adds JWT) */
   getMe(): Observable<{ usuario: Usuario }> {
-    const headers = { Authorization: `Bearer ${this.getToken()}` };
     return this.http
-      .get<{ usuario: Usuario }>(`${this.API}/me`, { headers })
+      .get<{ usuario: Usuario }>(`${this.API}/me`)
       .pipe(
         tap((res) => {
           localStorage.setItem('usuario', JSON.stringify(res.usuario));
@@ -119,13 +118,11 @@ export class AuthService {
       );
   }
 
-  /** Cambiar contraseña */
+  /** Cambiar contraseña (interceptor adds JWT) */
   changePassword(currentPassword: string, newPassword: string): Observable<{ mensaje: string }> {
-    const headers = { Authorization: `Bearer ${this.getToken()}` };
     return this.http.put<{ mensaje: string }>(
       `${this.API}/password`,
       { currentPassword, newPassword },
-      { headers },
     );
   }
 }

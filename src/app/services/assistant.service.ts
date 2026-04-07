@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -12,13 +12,8 @@ export class AssistantService {
   private readonly http = inject(HttpClient);
   private readonly API = environment.apiUrl;
 
-  /** Enviar pregunta al asistente de IA */
+  /** Enviar pregunta al asistente de IA (interceptor adds JWT) */
   ask(pregunta: string): Observable<AssistantResponse> {
-    const token = localStorage.getItem('token');
-    let headers = new HttpHeaders();
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    return this.http.post<AssistantResponse>(`${this.API}/assistant`, { pregunta }, { headers });
+    return this.http.post<AssistantResponse>(`${this.API}/assistant`, { pregunta });
   }
 }

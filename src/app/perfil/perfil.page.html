@@ -102,9 +102,14 @@
 
   <h3>Mis Dispositivos</h3>
 
+  <!-- LOADING -->
+  <div *ngIf="loadingDevices" class="device" style="justify-content:center;">
+    <p style="color:rgba(255,255,255,0.6); font-size:14px;">Cargando dispositivos...</p>
+  </div>
+
   <!-- SI NO HAY DISPOSITIVOS -->
 
-  <div *ngIf="dispositivos.length === 0" class="device">
+  <div *ngIf="!loadingDevices && dispositivos.length === 0" class="device">
 
     <div class="device-left">
       <img src="assets/img/device.png">
@@ -139,11 +144,15 @@
         <p *ngIf="device.ubicacion" class="device-ubicacion">📍 {{device.ubicacion}}</p>
 
         <p *ngIf="device.status === 'activo'" class="device-status-activo">
-            Activo
+            ● Activo
         </p>
 
-        <p *ngIf="device.status !== 'activo'" class="device-status-off">
-          Desconectado
+        <p *ngIf="device.status === 'alerta'" class="device-status-alerta">
+            ⚠ Alerta
+        </p>
+
+        <p *ngIf="device.status !== 'activo' && device.status !== 'alerta'" class="device-status-off">
+          ○ Desconectado
         </p>
 
       </div>
